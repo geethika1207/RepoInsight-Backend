@@ -43,4 +43,4 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     except subprocess.CalledProcessError:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to clone github repository")
 
-    return{github}
+    return github_url
