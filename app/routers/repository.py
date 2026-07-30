@@ -50,4 +50,4 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     repository_chunk = chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
 
-    return repository_chun
+    return repository_chunk
