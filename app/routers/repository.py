@@ -4,7 +4,7 @@ from ..db.database import get_db
 from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
-from .support_functions import read_repository
+from .support_functions import read_repository, chunk_repository
 
 import subprocess
 from pathlib import Path
@@ -46,6 +46,8 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     # read repository files 
 
-    repository_text = read_repository(destination)
+    repository_files = read_repository(destination)
 
-    return repository_text
+    repository_chunk = chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
+
+    return repository_chun

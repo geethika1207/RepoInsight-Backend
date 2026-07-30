@@ -32,4 +32,37 @@ def read_repository(repo_path):
         except Exception:
             continue
 
-    return repository_files
+    return repository_files   
+
+
+
+# Create chunks 
+
+def chunk_repository(repo_files, chunk_size:int, overlap:int, Repo_name : str, Repo_owner : str):
+    chunks = []
+
+    start = 0
+    chunk_index = 0 
+
+    for file in repo_files:
+
+        file_path = file["file_path"]
+        content = file["content"]
+
+        while start < len(content):
+
+            end = start + chunk_size
+            chunk_text = content[start:end]
+
+            chunks.append({
+                "file_path" : file_path,
+                "Repo_name" : Repo_name,
+                "Repo_owner" : Repo_owner,
+                "chunk_index" : chunk_index,
+                "chunk_text" : chunk_text,
+            })
+
+            chunk_index += 1
+            start = end - overlap
+
+    return chunks 
