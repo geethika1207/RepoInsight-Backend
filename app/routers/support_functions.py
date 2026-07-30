@@ -32,4 +32,4 @@ def read_repository(repo_path):
         except Exception:
             continue
 
-    return repository_file
+    return repository_files
