@@ -4,6 +4,7 @@ from ..db.database import get_db
 from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
+from .support_functions import read_repository
 
 import subprocess
 from pathlib import Path
@@ -43,4 +44,8 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     except subprocess.CalledProcessError:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to clone github repository")
 
-    return github_url
+    # read repository files 
+
+    repository_text = read_repository(destination)
+
+    return repository_text
