@@ -41,10 +41,10 @@ def read_repository(repo_path):
 def chunk_repository(repo_files, chunk_size:int, overlap:int, Repo_name : str, Repo_owner : str):
     chunks = []
 
-    start = 0
-    chunk_index = 0 
-
     for file in repo_files:
+
+        start = 0
+        chunk_index = 0 
 
         file_path = file["file_path"]
         content = file["content"]
