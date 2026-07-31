@@ -85,4 +85,4 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     db.commit()
 
     return{"Repository_id" : new_repository.id,
-           "chunk_embedding" : len(embedded_chuns)}
+           "chunk_embedding" : len(embedded_chunks)}
