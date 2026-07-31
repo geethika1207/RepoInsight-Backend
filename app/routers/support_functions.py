@@ -24,6 +24,9 @@ def read_repository(repo_path):
                 errors = "ignore"                              # Path.read_text() accepts errors, not error
             )
 
+            if "\x00" in content:
+                continue 
+
             repository_files.append({
                 "file_path" : str(file.relative_to(repo_path)),
                 "content" : content
@@ -64,5 +67,21 @@ def chunk_repository(repo_files, chunk_size:int, overlap:int, Repo_name : str, R
 
             chunk_index += 1
             start = end - overlap
+
+    return chunks 
+
+
+
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+def embedding_chunks(chunks):
+
+    for chunk in chunks:
+
+        embedding_chunk = model.encode(chunk["chunk_text"])
+
+        chunk["embedding"] = embedding_chunk.tolist()
 
     return chunks 

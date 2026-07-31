@@ -22,7 +22,7 @@ class Repository(Base):
     user_id = Column(INTEGER, ForeignKey("Users.id", ondelete="CASCADE"), nullable=False)
     repo_url = Column(String, nullable=False)
     repo_name = Column(String, nullable=False)
-    status = Column(String, nullable=False, server_default="processing")
+    repo_owner = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 
 
@@ -34,7 +34,7 @@ class Chunk(Base):
     repository_id = Column(INTEGER, ForeignKey("Repositories.id", ondelete="CASCADE"), nullable=False)
     chunk_index = Column(INTEGER, nullable=False)
     chunk_text = Column(Text, nullable=False)
-    embedding = Column(Vector(768), nullable=False)
+    chunk_embedding = Column(Vector(384), nullable=False)
     chunk_metadata = Column(JSON, nullable=False)
 
 
