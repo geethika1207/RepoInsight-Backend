@@ -85,6 +85,5 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     repo_id = new_repository.id
 
-    repository_summary_relevant_chunks = build_report_query.report_query(repo_id, prompt_templates.REPOSITORY_SUMMARY_QUERY)
+    repositor_summary_relevant_chunks = build_report_query.report_query(repo_id, prompt_templates.REPOSITORY_SUMMARY_QUERY)
 
-    
