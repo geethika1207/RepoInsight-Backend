@@ -17,7 +17,7 @@ Return a structured repository summary.
 """
 
 
-technology_stack_query = """
+TECHNOLOGY_STACK_QUERY = """
 What technologies are used in this repository?
 
 Identify the complete technology stack, including:

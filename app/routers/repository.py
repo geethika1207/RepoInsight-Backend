@@ -85,5 +85,89 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     repo_id = new_repository.id
 
-    repositor_summary_relevant_chunks = build_report_query.report_query(repo_id, prompt_templates.REPOSITORY_SUMMARY_QUERY)
+    repository_summary_relevant_chunks = build_report_query.report_query(
+    repo_id,
+    prompt_templates.REPOSITORY_SUMMARY_QUERY,
+    db
+    )
 
+    technology_stack_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.TECHNOLOGY_STACK_QUERY,
+        db
+    )
+
+    architecture_flow_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.ARCHITECTURE_FLOW_QUERY,
+        db
+    )
+
+    architecture_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.ARCHITECTURE_REVIEW_QUERY,
+        db
+    )
+
+    database_flow_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.DATABASE_FLOW_QUERY,
+        db
+    )
+
+    database_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.DATABASE_REVIEW_QUERY,
+        db
+    )
+
+    api_flow_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.API_FLOW_QUERY,
+        db
+    )
+
+    api_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.API_REVIEW_QUERY,
+        db
+    )
+
+    security_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.SECURITY_REVIEW_QUERY,
+        db
+    )
+
+    production_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.PRODUCTION_REVIEW_QUERY,
+        db
+    )
+
+    documentation_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.DOCUMENTATION_REVIEW_QUERY,
+        db
+    )
+
+    code_quality_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.CODE_QUALITY_REVIEW_QUERY,
+        db
+    )
+
+    improvement_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.IMPROVEMENT_QUERY,
+        db
+    )
+
+    contribution_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        prompt_templates.CONTRIBUTION_QUERY,
+        db
+    )
+
+
+    return contribution_relevant_chunks
