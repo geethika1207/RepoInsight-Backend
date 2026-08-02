@@ -83,6 +83,9 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
         db.add(new_chunk)
     db.commit()
 
+
+# Retrieve relevant chunks 
+
     repo_id = new_repository.id
 
     repository_summary_relevant_chunks = build_report_query.report_query(
