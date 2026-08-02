@@ -46,22 +46,25 @@ Retrieve the repository files that contain information about these technologies.
 
 
 ARCHITECTURE_FLOW_QUERY = """
-Retrieve the code that explains the overall architecture of this repository.
+Retrieve the repository content required to understand the overall architecture and application flow.
 
 Focus on:
 - application entry points
 - request flow
 - routing
+- controllers
 - services
 - business logic
 - utilities
 - models
 - database layer
-- folder organization
+- folder structure
 - dependency relationships
 - communication between components
+- application startup
+- data flow between modules
 
-The goal is to explain how data moves through the entire application from start to finish.
+The goal is to retrieve the repository content needed to explain how the application works from start to finish.
 """
 
 
@@ -84,23 +87,26 @@ The goal is to review the architecture and identify strengths, weaknesses, and p
 
 
 DATABASE_FLOW_QUERY = """
-Retrieve the code responsible for database operations.
+Retrieve the code related to the database layer of this repository.
 
 Focus on:
-- models
+- database models
 - schemas
-- repositories
+- tables or collections
+- relationships between tables
+- SQLAlchemy or ORM implementation
 - CRUD operations
-- database relationships
-- migrations
-- SQLAlchemy usage
-- transactions
-- queries
-- how data is stored
+- how data is inserted
+- how data is updated
 - how data is retrieved
-- how data moves through the application
+- query execution
+- transactions
+- migrations
+- vector database usage (if present)
+- embedding storage (if present)
+- semantic search workflow (if present)
 
-The goal is to explain the complete database workflow.
+The goal is to explain how data is stored, organized, and retrieved inside the database from beginning to end.
 """
 
 
@@ -120,44 +126,6 @@ Focus on:
 - security
 
 The goal is to review the database implementation and identify improvements.
-"""
-
-
-API_FLOW_QUERY = """
-Retrieve the implementation related to APIs.
-
-Focus on:
-- routers
-- endpoints
-- request handling
-- response handling
-- dependency injection
-- authentication
-- middleware
-- service calls
-- validation
-- business logic
-
-The goal is to explain how API requests travel through the backend.
-"""
-
-
-API_REVIEW_QUERY = """
-Retrieve the code required to evaluate the API implementation.
-
-Focus on:
-- endpoint design
-- REST practices
-- request validation
-- response consistency
-- status codes
-- authentication
-- authorization
-- error handling
-- scalability
-- maintainability
-
-The goal is to review the API quality and identify possible improvements.
 """
 
 
