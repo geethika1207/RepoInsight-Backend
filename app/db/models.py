@@ -45,7 +45,6 @@ class Analysis(Base):
 
     repository_id = Column(INTEGER, ForeignKey("Repositories.id", ondelete="CASCADE"), nullable=False)
 
-    overall_score = Column(Float)
 
     architecture_report = Column(Text)
 
@@ -60,8 +59,6 @@ class Analysis(Base):
     documentation_review = Column(Text)
 
     strengths = Column(Text)
-
-    weaknesses = Column(Text)
 
     beginner_contributions = Column(Text)
 

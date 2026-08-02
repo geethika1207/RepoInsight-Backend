@@ -4,8 +4,8 @@ from ..db.database import get_db
 from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
-from .support_functions import read_repository, chunk_repository, embedding_chunks
-
+from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
+from ..service import prompt_templates, build_report_query
 import subprocess
 from pathlib import Path
 
@@ -58,13 +58,12 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     db.commit()
     db.refresh(new_repository)
 
-    # read repository files 
 
-    repository_files = read_repository(destination)
+    repository_files = extract_repo_files.read_repository(destination)
 
-    repository_chunks = chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
+    repository_chunks = create_repo_chunks.chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
 
-    embedded_chunks = embedding_chunks(repository_chunks)
+    embedded_chunks = generate_chunk_embeddings.embedding_chunks(repository_chunks)
 
 
     for chunk in embedded_chunks:
@@ -73,16 +72,19 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
             chunk_index = chunk["chunk_index"],
             chunk_text = chunk["chunk_text"],
             chunk_embedding = chunk["embedding"],
-            chunk_metadata = [{
+            chunk_metadata = {
                 "chunk_file_path" : chunk["file_path"],
                 "chunk_name" : chunk["Repo_name"],
                 "chunk_owner" : chunk["Repo_owner"],
                 "chunk_index" : chunk["chunk_index"],
-            }]
+            }
         )
 
         db.add(new_chunk)
     db.commit()
 
-    return{"Repository_id" : new_repository.id,
-           "chunk_embedding" : len(embedded_chunks)}
+    repo_id = new_repository.id
+
+    repository_summary_relevant_chunks = build_report_query.report_query(repo_id, prompt_templates.REPOSITORY_SUMMARY_QUERY)
+
+    
