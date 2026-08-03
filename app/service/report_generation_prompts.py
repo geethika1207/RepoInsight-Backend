@@ -351,3 +351,337 @@ Keep every suggestion practical, concise, and supported by the repository contex
 Return only the Database Review.
 
 """
+
+
+SECURITY_REVIEW_PROMPT = """
+
+You are generating the Security Review section for a GitHub repository.
+
+You have already received the relevant repository files related to security.
+Evaluate the repository from a security perspective.
+
+Review the following areas:
+
+- Authentication implementation
+- Authorization and access control
+- JWT or session handling
+- Password hashing and storage
+- Secret management
+- Environment variable usage
+- Hardcoded API keys, passwords, secrets or tokens
+- Presence of .env or other sensitive configuration files
+- SQL Injection protection
+- Input validation
+- File upload validation (if present)
+- CORS configuration
+- Sensitive data exposure
+- Error handling and information leakage
+- Overall backend security practices
+
+If a .env file, API key, secret token, database password, JWT secret, private key, or any sensitive credential is found inside the repository, clearly mark it as a **Critical Security Issue** and recommend removing it immediately.
+
+If a security feature is not present in the repository even f it is required , state:
+"Not implemented in the repository."
+
+Return the response in this format:
+
+## Overall Security
+Write 2 to 3 sentences describing the overall security level of the project.
+
+## Strengths
+Provide 3 to 5 security strengths found in the repository.
+
+## Improvement Suggestions
+Provide 3 to 5 practical security recommendations based only on the repository content.
+
+Do not invent issues that are not present.
+Do not mention architecture, database, API quality, or production readiness.
+Base your review only on the provided repository files.
+Return only the Security Review.
+
+"""
+
+
+PRODUCTION_READINESS_PROMPT = """
+
+You are generating the Production Readiness Review for a GitHub repository.
+
+You have already received the repository files that are relevant to production readiness.
+Evaluate whether this project is ready to be deployed and maintained in a real production environment.
+
+Review the repository for the following:
+
+- Environment variable management
+- Configuration management
+- Logging implementation
+- Error handling
+- Exception handling
+- Deployment configuration
+- Docker or containerization support
+- Performance optimizations
+- Caching implementation
+- Background job processing
+- Scalability considerations
+- Health check endpoints
+- Monitoring or observability support
+- Testing (unit, integration, API tests)
+- Dependency management
+- Reliability and maintainability
+- Production best practices
+
+If a feature is not implemented or cannot be found in the repository even if it is required , clearly state:
+"Not implemented in the repository."
+
+Return the response in the following format:
+
+## Overall Production Readiness
+Write 2 to 3 sentences describing how ready this project is for production deployment.
+
+## Strengths
+Provide 3 to 5 production-ready practices already implemented in the repository.
+
+## Improvment Suggestions
+Provide 3 to 5 practical recommendations that would improve the project's production readiness.
+
+Rules:
+- Base your review only on the provided repository content.
+- Do not invent features that are not present.
+- Do not discuss API quality, database design, architecture, security, or documentation unless they directly affect production readiness.
+- Keep the suggestions practical and actionable.
+- Return only the Production Readiness Review.
+
+"""
+
+
+DOCUMENTATION_REVIEW_PROMPT = """
+
+You are generating the Documentation Review for a GitHub repository.
+
+You have already received the repository files related to documentation.
+Your primary source should be README.md.
+
+If README.md is not present, use other documentation files such as:
+
+- docs/
+- CONTRIBUTING.md
+- INSTALL.md
+- SETUP.md
+- Any other documentation-related files found in the repository.
+
+If README.md is not found, clearly mention:
+"README.md was not found in the repository. This review is based on the available documentation files and repository structure."
+
+If no documentation files are found, clearly mention:
+"No documentation files were found in the repository. This review is generated using the available repository structure only."
+
+Evaluate the documentation based on:
+
+- Project overview
+- Installation guide
+- Setup instructions
+- Usage instructions
+- Configuration guide
+- Environment variable documentation
+- API documentation
+- Project structure explanation
+- Contribution guidelines
+- Examples or screenshots
+- Overall clarity
+- Completeness
+- Ease of understanding for a new developer
+
+Return the report in the following format:
+
+## Overall Documentation
+
+Write 2 to 3 sentences describing the overall quality and completeness of the documentation.
+
+## Strengths
+
+Provide 3 to 5 strengths found in the documentation.
+
+## Suggestions
+
+Provide 3 to 5 practical suggestions to improve the documentation.
+
+Rules:
+
+- Base your review only on the provided repository content.
+- Do not invent documentation that does not exist.
+- If a section is missing, simply state that it is not documented.
+- Do not evaluate the source code itself unless it is necessary to understand the documentation.
+- Keep the suggestions practical and concise.
+
+Return only the Documentation Review.
+
+"""
+
+
+CODE_QUALITY_PROMPT = """
+
+You are generating the Code Quality Review for a GitHub repository.
+
+You have already received the most relevant source code from the repository.
+Your task is to evaluate the overall quality of the codebase.
+
+Review the code based on:
+
+- Readability
+- Naming conventions
+- Code organization
+- Modularity
+- Reusability
+- Function complexity
+- Class design
+- Code duplication
+- Maintainability
+- Consistency
+- Best coding practices
+- Error handling
+- Comments and documentation
+- Overall implementation quality
+
+Analyze only the provided repository content.
+
+Do not invent issues that are not present.
+Do not review architecture, database design, API design, security, production readiness, or documentation.
+
+Return the response in the following format:
+
+## Overall Code Quality
+
+Write 2 to 3 sentences describing the overall quality of the codebase.
+
+## Strengths
+
+Provide 3 to 5 strengths found in the implementation.
+
+Focus only on strengths supported by the repository.
+
+## Improvement Suggestions
+
+Provide 3 to 5 practical suggestions that would improve the code quality.
+
+For every suggestion:
+
+- Explain what can be improved.
+- Briefly explain why the improvement is beneficial.
+- Suggest practical coding best practices when applicable.
+
+Examples:
+
+• Consider using more descriptive variable and function names to improve code readability.
+• Consider extracting repeated logic into reusable helper functions to reduce code duplication.
+• Consider adding type hints or docstrings to improve maintainability.
+• Consider reducing large functions into smaller reusable functions to improve readability.
+
+Keep every suggestion concise, practical, and supported by the repository context.
+
+Return only the Code Quality Review.
+
+"""
+
+
+CONTRIBUTIONS_PROMPT = """
+You are generating the Contribution Opportunities report for a GitHub repository.
+
+You have already received the repository files that are relevant for identifying possible contributions.
+
+Your task is to identify practical contribution opportunities for developers with different experience levels.
+
+Classify every contribution into one of the following categories:
+
+Beginner : 
+
+These tasks should require minimal understanding of the repository and can usually be completed within 30 minutes to 2 hours.
+
+Examples include:
+- Missing comments or docstrings
+- TODO comments
+- Typo fixes
+- README improvements
+- Documentation improvements
+- Small bug fixes
+- Simple validation improvements
+- Renaming unclear variables or functions
+- Removing dead code
+- Adding logging
+- Minor refactoring
+
+Intermediate : 
+
+These tasks require understanding one module or feature of the project and may take several hours or a few days.
+
+Examples include:
+- Refactoring duplicated code
+- Improving database queries
+- Adding a missing API endpoint
+- Improving authentication flow
+- Adding caching
+- Improving error handling
+- Writing unit tests
+- Performance improvements
+- Completing partially implemented features
+
+Advanced : 
+
+These tasks require understanding multiple modules or the overall project architecture and may take several days.
+
+Examples include:
+- Large feature development
+- Architecture redesign
+- Database migration
+- Background job systems
+- Distributed systems
+- Streaming or WebSocket support
+- AI pipeline improvements
+- Performance optimization across multiple modules
+- Security redesign
+
+Return the report in the following format:
+
+## Beginner Contributions
+
+Provide 3 to 5 beginner-friendly contribution ideas.
+
+For each contribution include:
+- Estimated effort (for example: 30 to 60 minutes)
+- What should be improved
+- Why it is a good beginner task
+
+## Intermediate Contributions
+
+Provide 3 to 5 intermediate contribution ideas.
+
+For each contribution include:
+- Estimated effort (for example: 4 to 8 hours)
+- What should be improved
+- Why it requires intermediate knowledge
+
+## Advanced Contributions
+
+Provide 3 to 5 advanced contribution ideas.
+
+For each contribution include:
+- Estimated effort (for example: 2 to 5 days)
+- What should be improved
+- Why it requires advanced knowledge
+
+If no valid contribution opportunities are found for a category, clearly state:
+
+"There are no Beginner Contributions in this repository."
+"There are no Intermediate Contributions in this repository."
+"There are no Advanced Contributions in this repository."
+
+Do not invent contribution ideas just to fill the section.
+
+Rules:
+
+- Base every suggestion only on the provided repository content.
+- Do not invent features or issues that are not present.
+- Classify tasks based on the amount of repository knowledge required, not the number of lines of code.
+- Suggestions should be practical, specific, and actionable.
+- Avoid generic advice such as "improve the project" or "write better code."
+- Return only the Contribution Opportunities report.
+
+"""

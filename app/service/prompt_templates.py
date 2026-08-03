@@ -171,44 +171,53 @@ The goal is to evaluate how close the repository is to production deployment.
 
 
 DOCUMENTATION_REVIEW_QUERY = """
-Retrieve documentation related to this repository.
+Retrieve the repository documentation required to evaluate the project documentation.
 
-Focus primarily on README.md.
+Focus primarily on:
+- README.md
 
-Only retrieve other documentation files if README.md does not contain sufficient information.
+Also retrieve other documentation files when available, including:
+- docs/
+- CONTRIBUTING.md
+- INSTALL.md
+- SETUP.md
+- Any other documentation-related files
 
-Evaluate:
-- installation instructions
+Focus on documentation related to:
+
 - project overview
+- installation instructions
+- setup guide
 - usage examples
 - API documentation
-- setup guide
 - project structure explanation
+- environment configuration
 - contribution guide
 - completeness
 - clarity
 
-Ignore normal source code unless it is necessary to understand missing documentation.
+Avoid retrieving normal source code unless it is directly required to understand the documentation.
 """
 
-
 CODE_QUALITY_REVIEW_QUERY = """
-Retrieve the implementation required to evaluate overall code quality.
+Retrieve the repository implementation required to evaluate the overall code quality.
 
 Focus on:
 - readability
 - naming conventions
 - code organization
-- duplication
+- modularity
+- reusability
+- code duplication
 - maintainability
 - function complexity
 - class design
 - consistency
-- best practices
+- error handling
 - comments
-- modularity
+- coding best practices
 
-The goal is to review the overall quality of the codebase.
+The goal is to retrieve the repository content required to evaluate how well the code is written and implemented.
 """
 
 
@@ -232,20 +241,29 @@ The goal is to generate practical improvement suggestions for the project.
 
 
 CONTRIBUTION_QUERY = """
-Retrieve the implementation required to identify possible contribution opportunities.
+Retrieve the repository implementation required to identify contribution opportunities.
 
 Focus on:
 - unfinished modules
-- TODOs
-- repetitive code
-- missing documentation
-- missing tests
+- TODO comments
+- FIXME comments
+- missing features
 - feature gaps
+- repetitive code
+- duplicated logic
 - refactoring opportunities
 - optimization opportunities
+- missing documentation
+- missing comments or docstrings
+- missing unit or integration tests
+- placeholder implementations
+- partially implemented functionality
+- code marked for future improvements
+- technical debt
 
-The goal is to generate contribution ideas for:
+The goal is to retrieve the repository content required to identify contribution opportunities suitable for:
 - Beginner developers
 - Intermediate developers
 - Advanced developers
+
 """
