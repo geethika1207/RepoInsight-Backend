@@ -199,6 +199,7 @@ Focus on documentation related to:
 Avoid retrieving normal source code unless it is directly required to understand the documentation.
 """
 
+
 CODE_QUALITY_REVIEW_QUERY = """
 Retrieve the repository implementation required to evaluate the overall code quality.
 
@@ -218,25 +219,6 @@ Focus on:
 - coding best practices
 
 The goal is to retrieve the repository content required to evaluate how well the code is written and implemented.
-"""
-
-
-IMPROVEMENT_QUERY = """
-Retrieve the repository implementation that can help identify improvements.
-
-Focus on:
-- missing features
-- incomplete modules
-- scalability issues
-- maintainability
-- performance
-- security
-- documentation
-- architecture
-- API improvements
-- database improvements
-
-The goal is to generate practical improvement suggestions for the project.
 """
 
 
