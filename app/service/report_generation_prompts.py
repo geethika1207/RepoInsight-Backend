@@ -32,7 +32,15 @@ Requirements:
 - Do not mention implementation details unless they are essential to understanding the project's purpose.
 - Base the summary only on the provided repository content.
 
-Return only the repository summary paragraph.
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "overall_summary" : "..."
+}
 
 """
 
@@ -46,22 +54,22 @@ Your task is to identify every technology used in the repository.
 Extract only technologies that are supported by the provided repository context.
 Organize the output using the following sections:
 
-- Programming Language
-- Backend Framework
-- Frontend Framework
-- Libraries
-- Database
-- ORM
-- Vector Database
-- AI / LLM Models
-- Embedding Models
-- Authentication
-- Cache
-- Background Jobs / Queue
-- Cloud & Deployment
-- External APIs / Services
-- Development Tools
-- Testing Frameworks
+programming_language
+backend_framework
+frontend_framework
+libraries
+database
+orm
+vector_database
+ai_llm_models
+embedding_models
+authentication
+cache
+background_jobs_queue
+cloud_deployment
+external_apis_services
+development_tools
+testing_frameworks
 
 Requirements:
 - Return only the technology name for each category.
@@ -76,57 +84,82 @@ Requirements:
 
 Example Format:
 
-Programming Language
+programming_language
 Python
 
-Backend Framework
+backend_framework
 FastAPI
 
-Frontend Framework
+frontend_framework
 Not mentioned in the repository.
 
-Libraries
+libraries
 SQLAlchemy
 Pydantic
 Sentence Transformers
 
-Database
+database
 PostgreSQL
 
-ORM
+orm
 SQLAlchemy
 
-Vector Database
+vector_database
 PGVector
 
-AI / LLM Models
+ai_llm_models
 Llama 3.3 70B (Groq)
 
-Embedding Models
+embedding_models
 all-MiniLM-L6-v2
 
-Authentication
+authentication
 JWT
 
-Cache
+cache
 Redis
 
-Background Jobs / Queue
+background_jobs_queue
 RQ
 
-Cloud & Deployment
+cloud_deployment
 Render
 
-External APIs / Services
+external_apis_services
 Groq API
 GitHub API
 
-Development Tools
+development_tools
 Docker
 Git
 
-Testing Frameworks
+testing_frameworks
 Not mentioned in the repository.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "programming_language" : "...",
+   "backend_framework" : "...",
+   "frontend_framework" : "...",
+   "libraries" : [...],
+   "database" : "...",
+   "orm" : "...",
+   "vector_database" : "...",
+   "ai/llm_models" : [...],
+   "embedding_model" : "...",
+   "authentication" : "...",
+   "cache" : "...",
+   "bachground_jobs queue" : "...",
+   "cloud & deployment" : "...",
+   "external api's / services" : [...],
+   "development tools" : [...],   
+   "testing frameworks" : [...]
+}
 
 """
 
@@ -147,13 +180,13 @@ Focus on:
 
 Requirements:
 
-- Explain the architecture in the order the flow actually happens.
-- Use numbered steps.
-- Connect each step using a downward arrow (↓) to make the flow easy to understand.
-- Each step should contain 1 to 2 concise sentences explaining its responsibility.
-- Keep the explanation clear and easy for developers to understand.
-- If a component does not exist in the repository, do not mention it.
-- Base the flow only on the retrieved repository content.
+- Explain the architecture in the exact order it executes.
+- Return the flow as an array where each array element represents ONE step only.
+- Each step should be short (1 to 2 concise sentences).
+- Do NOT include the arrow (↓) inside the JSON.
+- The frontend will display the arrows between the array items.
+- Mention only components that exist in the repository.
+- Base the explanation only on the provided repository context.
 - Do not invent missing components.
 
 Do NOT:
@@ -164,22 +197,25 @@ Do NOT:
 - Discuss production readiness.
 - Repeat information.
 
-Return the output in the following format:
-
-Architecture Flow
-
-1. First step
-   ↓
-
-2. Second step
-   ↓
-
-3. Third step
-   ↓
-
-...
+Architecture Summary : 
 
 After the numbered flow, write a short concluding paragraph (2 to 4 sentences) summarizing how the complete architecture works from request initiation to response generation.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+
+{
+  "architecture_flow": [
+    "...",
+    "...",
+    "..."
+  ],
+  "architecture_summary": "..."
+}
 
 """
 
@@ -220,19 +256,30 @@ Do NOT include:
 - Architecture review
 - API flow
 - Request flow
-- Security review
+- Security review 
 - Code quality review
 - Improvement suggestions
 - Production readiness
 
+Datbase summary : 
+
 After the numbered flow, write a short conclusion (3 to 5 sentences) explaining how the application's database is structured and how data moves through the database during normal execution.
 
-Return only the Database Flow report.
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "database_flow" : [...],
+   "database_summary" : "..."
+}
 
 """
 
 
-ARCHUTECTURE_REPORT_PROMPT = """
+ARCHITECTURE_REPORT_PROMPT = """
 
 You are reviewing the software architecture of a GitHub repository.
 
@@ -284,6 +331,19 @@ Example style:
 Keep every suggestion constructive, practical, and supported by the repository context.
 
 Return only the Architecture Review.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+
+{
+   "overall_architecture" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
 
 """
 
@@ -350,6 +410,18 @@ Keep every suggestion practical, concise, and supported by the repository contex
 
 Return only the Database Review.
 
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "overall_database_design" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
+
 """
 
 
@@ -397,7 +469,20 @@ Provide 3 to 5 practical security recommendations based only on the repository c
 Do not invent issues that are not present.
 Do not mention architecture, database, API quality, or production readiness.
 Base your review only on the provided repository files.
+
 Return only the Security Review.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "security_review" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
 
 """
 
@@ -450,6 +535,18 @@ Rules:
 - Keep the suggestions practical and actionable.
 - Return only the Production Readiness Review.
 
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "production_readiness" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
+
 """
 
 
@@ -500,7 +597,7 @@ Write 2 to 3 sentences describing the overall quality and completeness of the do
 
 Provide 3 to 5 strengths found in the documentation.
 
-## Suggestions
+## Improvement Suggestions
 
 Provide 3 to 5 practical suggestions to improve the documentation.
 
@@ -513,6 +610,19 @@ Rules:
 - Keep the suggestions practical and concise.
 
 Return only the Documentation Review.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "documentation_review" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
+
 
 """
 
@@ -578,6 +688,19 @@ Examples:
 Keep every suggestion concise, practical, and supported by the repository context.
 
 Return only the Code Quality Review.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "code quality_review" : "...",
+   "strengths" : [...],
+   "improvement_suggestions" : [...]
+}
+
 
 """
 
@@ -683,5 +806,17 @@ Rules:
 - Suggestions should be practical, specific, and actionable.
 - Avoid generic advice such as "improve the project" or "write better code."
 - Return only the Contribution Opportunities report.
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
+Do not add additional fields.
+Return only the keys shown below.
+
+{
+   "beginner_contributions" : [...],
+   "intermediate_contributions" : [...],
+   "advanced_contributions" : [...]
+}
 
 """

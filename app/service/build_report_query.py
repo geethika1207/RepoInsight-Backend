@@ -15,7 +15,7 @@ def report_query(repo_id:int, query:str, db:session):
             models.Chunk.chunk_embedding.cosine_distance(embed_query)
         )
         .limit(16)
-        .all()
+        .all() 
     )
 
     return chunks 
