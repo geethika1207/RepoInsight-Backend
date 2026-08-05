@@ -5,7 +5,7 @@ from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
 from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
-from ..service import pgvector_queries, build_report_query, combine_chunks_prompts, report_generation_prompts
+from ..service import pgvector_queries, build_report_query, combine_chunks_prompts, report_generation_prompts, prompt_preprocessor
 import subprocess
 from pathlib import Path
 
@@ -166,15 +166,39 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     architecture_review_code_quality_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(architecture_review_relevant_chunks, code_quality_review_relevant_chunks)
 
-    production_review_security_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(production_review_relevant_chunks, code_quality_review_relevant_chunks)
+    production_review_security_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(production_review_relevant_chunks, security_review_relevant_chunks)
 
 
-   # combine identical report prompts
+    # combine identical report prompts
 
-    summary_technology_stack_relevant_prompt = combine_chunks_prompts.summary_technology_stack_prompts(report_generation_prompts.REPOSITORY_SUMMARY_PROMPT, report_generation_prompts.TECHNOLOGY_STACK_PROMPT)
+    summary_technology_stack_prompt = combine_chunks_prompts.summary_technology_stack_prompts(report_generation_prompts.REPOSITORY_SUMMARY_PROMPT, report_generation_prompts.TECHNOLOGY_STACK_PROMPT)
 
-    architecture_flow_database_flow_relevant_prompt = combine_chunks_prompts.architecture_flow_database_flow_prompts(report_generation_prompts.ARCHITECTURE_FLOW_PROMPT, report_generation_prompts.DATABASE_FLOW_PROMPT)
+    architecture_flow_database_flow_prompt = combine_chunks_prompts.architecture_flow_database_flow_prompts(report_generation_prompts.ARCHITECTURE_FLOW_PROMPT, report_generation_prompts.DATABASE_FLOW_PROMPT)
 
-    architecture_review_code_quality_review_relevant_prompt = combine_chunks_prompts.architecture_review_code_quality_review_prompts(report_generation_prompts.ARCHITECTURE_REVIEW_PROMPT, report_generation_prompts.CODE_QUALITY_PROMPT)
+    architecture_review_code_quality_review_prompt = combine_chunks_prompts.architecture_review_code_quality_review_prompts(report_generation_prompts.ARCHITECTURE_REVIEW_PROMPT, report_generation_prompts.CODE_QUALITY_PROMPT)
 
-    production_review_security_review_relevant_chunks = combine_chunks_prompts.production_review_security_review_prompts(report_generation_prompts.PRODUCTION_READINESS_PROMPT, report_generation_prompts.SECURITY_REVIEW_PROMPT)
+    production_review_security_review_prompt = combine_chunks_prompts.production_review_security_review_prompts(report_generation_prompts.PRODUCTION_READINESS_PROMPT, report_generation_prompts.SECURITY_REVIEW_PROMPT)
+
+    database_review_prompt = report_generation_prompts.DATABASE_REVIEW_PROMPT
+
+    documentation_review_prompt = report_generation_prompts.DOCUMENTATION_REVIEW_PROMPT
+
+    contributions_analysis_prompt = report_generation_prompts.CONTRIBUTIONS_PROMPT
+
+
+    # final llm prompt 
+
+    summary_technology_stack_llm_prompt = prompt_preprocessor.final_prompt(summary_technology_stack_relevant_chunks, summary_technology_stack_prompt)
+
+    architecture_flow_database_flow_llm_prompt = prompt_preprocessor.final_prompt(architecture_flow_database_flow_relevant_chunks, architecture_flow_database_flow_prompt)
+
+    architecture_review_code_quality_review_llm_prompt = prompt_preprocessor.final_prompt(architecture_review_code_quality_review_relevant_chunks, architecture_review_code_quality_review_prompt)
+
+    production_review_security_review_llm_prompt = prompt_preprocessor.final_prompt(production_review_security_review_relevant_chunks, production_review_security_review_prompt)
+
+    database_review_llm_prompt = prompt_preprocessor.final_prompt(database_review_relevant_chunks, database_review_prompt)
+
+    documentation_review_llm_prompt = prompt_preprocessor.final_prompt(documentation_review_relevant_chunks, documentation_review_prompt)
+
+    contributions_analysis_llm_prompt = prompt_preprocessor.final_prompt(contribution_relevant_chunks, contributions_analysis_prompt)
+
