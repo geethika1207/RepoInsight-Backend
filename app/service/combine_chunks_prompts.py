@@ -57,6 +57,7 @@ def summary_technology_stack_prompts(prompt1, prompt2):
     }}
 
 """
+    return PROJECT_OVERVIEW_QUERY
 
 
 def architecture_flow_database_flow_prompts(prompt1, prompt2):
@@ -97,6 +98,7 @@ def architecture_flow_database_flow_prompts(prompt1, prompt2):
     }}
 
 """
+    return PROJECT_flow_QUERY
 
 
 def architecture_review_code_quality_review_prompts(prompt1, prompt2):
@@ -135,6 +137,7 @@ def architecture_review_code_quality_review_prompts(prompt1, prompt2):
     }}
 
 """
+    return PROJECT_review_QUERY
 
 
 def production_review_security_review_prompts(prompt1, prompt2):
@@ -173,3 +176,4 @@ def production_review_security_review_prompts(prompt1, prompt2):
     }}
 
 """
+    return PROJECT_review_QUERY
