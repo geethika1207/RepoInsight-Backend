@@ -20,4 +20,4 @@ def report_query(repo_id:int, query:str, db:session):
         .all() 
     )
 
-    return [chunk.chunk_file for chunk in chunks]   # Since it returns list of strings its acceptable for dict.fromkeys() .. if it is list of dicts we have toconvert it into list of strings but now its exactly has right format ..
+    return [chunk.chunk_text for chunk in chunks]   # Since it returns list of strings its acceptable for dict.fromkeys() .. if it is list of dicts we have toconvert it into list of strings but now its exactly has right format ..
