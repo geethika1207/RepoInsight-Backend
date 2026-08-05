@@ -5,7 +5,7 @@ from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
 from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
-from ..service import pgvector_queries, build_report_query, combine_chunks_prompts
+from ..service import pgvector_queries, build_report_query, combine_chunks_prompts, report_generation_prompts
 import subprocess
 from pathlib import Path
 
@@ -169,4 +169,12 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     production_review_security_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(production_review_relevant_chunks, code_quality_review_relevant_chunks)
 
 
-    
+   # combine identical report prompts
+
+    summary_technology_stack_relevant_prompt = combine_chunks_prompts.summary_technology_stack_prompts(report_generation_prompts.REPOSITORY_SUMMARY_PROMPT, report_generation_prompts.TECHNOLOGY_STACK_PROMPT)
+
+    architecture_flow_database_flow_relevant_prompt = combine_chunks_prompts.architecture_flow_database_flow_prompts(report_generation_prompts.ARCHITECTURE_FLOW_PROMPT, report_generation_prompts.DATABASE_FLOW_PROMPT)
+
+    architecture_review_code_quality_review_relevant_prompt = combine_chunks_prompts.architecture_review_code_quality_review_prompts(report_generation_prompts.ARCHITECTURE_REVIEW_PROMPT, report_generation_prompts.CODE_QUALITY_PROMPT)
+
+    production_review_security_review_relevant_chunks = combine_chunks_prompts.production_review_security_review_prompts(report_generation_prompts.PRODUCTION_READINESS_PROMPT, report_generation_prompts.SECURITY_REVIEW_PROMPT)
