@@ -2,6 +2,8 @@ from sentence_transformers import SentenceTransformer
 from ..db.database import get_db
 from sqlalchemy.orm import session
 from ..db import models
+from typing import List
+from ..schemas.repository import Analysis
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def report_query(repo_id:int, query:str, db:session):
@@ -18,4 +20,4 @@ def report_query(repo_id:int, query:str, db:session):
         .all() 
     )
 
-    return chunks 
+    return [chunk.chunk_text for chunk in chunks]   # Since it returns list of strings its acceptable for dict.fromkeys() .. if it is list of dicts we have toconvert it into list of strings but now its exactly has right format ..

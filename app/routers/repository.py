@@ -5,7 +5,7 @@ from sqlalchemy.orm import session
 from ..db import models
 from ..schemas import repository
 from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
-from ..service import prompt_templates, build_report_query
+from ..service import pgvector_queries, build_report_query, combine_chunks_prompts
 import subprocess
 from pathlib import Path
 
@@ -90,87 +90,83 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     repository_summary_relevant_chunks = build_report_query.report_query(
     repo_id,
-    prompt_templates.REPOSITORY_SUMMARY_QUERY,
+    pgvector_queries.REPOSITORY_SUMMARY_QUERY,
     db
     )
 
     technology_stack_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.TECHNOLOGY_STACK_QUERY,
+        pgvector_queries.TECHNOLOGY_STACK_QUERY,
         db
     )
 
     architecture_flow_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.ARCHITECTURE_FLOW_QUERY,
-        db
-    )
-
-    architecture_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.ARCHITECTURE_REVIEW_QUERY,
+        pgvector_queries.ARCHITECTURE_FLOW_QUERY,
         db
     )
 
     database_flow_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.DATABASE_FLOW_QUERY,
+        pgvector_queries.DATABASE_FLOW_QUERY,
         db
     )
 
-    database_review_relevant_chunks = build_report_query.report_query(
+    architecture_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.DATABASE_REVIEW_QUERY,
-        db
-    )
-
-    api_flow_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.API_FLOW_QUERY,
-        db
-    )
-
-    api_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.API_REVIEW_QUERY,
-        db
-    )
-
-    security_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.SECURITY_REVIEW_QUERY,
-        db
-    )
-
-    production_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.PRODUCTION_REVIEW_QUERY,
-        db
-    )
-
-    documentation_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        prompt_templates.DOCUMENTATION_REVIEW_QUERY,
+        pgvector_queries.ARCHITECTURE_REVIEW_QUERY,
         db
     )
 
     code_quality_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.CODE_QUALITY_REVIEW_QUERY,
+        pgvector_queries.CODE_QUALITY_REVIEW_QUERY,
+        db
+    )
+    
+    security_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        pgvector_queries.SECURITY_REVIEW_QUERY,
         db
     )
 
-    improvement_relevant_chunks = build_report_query.report_query(
+    production_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.IMPROVEMENT_QUERY,
+        pgvector_queries.PRODUCTION_REVIEW_QUERY,
         db
     )
+
+
+
+    database_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        pgvector_queries.DATABASE_REVIEW_QUERY,
+        db
+    )
+
+    documentation_review_relevant_chunks = build_report_query.report_query(
+        repo_id,
+        pgvector_queries.DOCUMENTATION_REVIEW_QUERY,
+        db
+    )
+
 
     contribution_relevant_chunks = build_report_query.report_query(
         repo_id,
-        prompt_templates.CONTRIBUTION_QUERY,
+        pgvector_queries.CONTRIBUTION_QUERY,
         db
     )
 
 
-    return contribution_relevant_chunks
+    # combine identical report chunks
+
+    summary_technology_stack_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(repository_summary_relevant_chunks , technology_stack_relevant_chunks)
+
+    architecture_flow_database_flow_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(architecture_flow_relevant_chunks , database_flow_relevant_chunks)
+
+    architecture_review_code_quality_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(architecture_review_relevant_chunks, code_quality_review_relevant_chunks)
+
+    production_review_security_review_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(production_review_relevant_chunks, code_quality_review_relevant_chunks)
+
+
+    

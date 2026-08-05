@@ -32,16 +32,6 @@ Requirements:
 - Do not mention implementation details unless they are essential to understanding the project's purpose.
 - Base the summary only on the provided repository content.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "overall_summary" : "..."
-}
-
 """
 
 
@@ -136,30 +126,6 @@ Git
 testing_frameworks
 Not mentioned in the repository.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "programming_language" : "...",
-   "backend_framework" : "...",
-   "frontend_framework" : "...",
-   "libraries" : [...],
-   "database" : "...",
-   "orm" : "...",
-   "vector_database" : "...",
-   "ai/llm_models" : [...],
-   "embedding_model" : "...",
-   "authentication" : "...",
-   "cache" : "...",
-   "bachground_jobs queue" : "...",
-   "cloud & deployment" : "...",
-   "external api's / services" : [...],
-   "development tools" : [...],   
-   "testing frameworks" : [...]
-}
 
 """
 
@@ -201,21 +167,6 @@ Architecture Summary :
 
 After the numbered flow, write a short concluding paragraph (2 to 4 sentences) summarizing how the complete architecture works from request initiation to response generation.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-
-{
-  "architecture_flow": [
-    "...",
-    "...",
-    "..."
-  ],
-  "architecture_summary": "..."
-}
 
 """
 
@@ -265,21 +216,11 @@ Datbase summary :
 
 After the numbered flow, write a short conclusion (3 to 5 sentences) explaining how the application's database is structured and how data moves through the database during normal execution.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "database_flow" : [...],
-   "database_summary" : "..."
-}
 
 """
 
 
-ARCHITECTURE_REPORT_PROMPT = """
+ARCHITECTURE_REVIEW_PROMPT = """
 
 You are reviewing the software architecture of a GitHub repository.
 
@@ -331,19 +272,6 @@ Example style:
 Keep every suggestion constructive, practical, and supported by the repository context.
 
 Return only the Architecture Review.
-
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-
-{
-   "overall_architecture" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
-}
 
 """
 
@@ -472,17 +400,6 @@ Base your review only on the provided repository files.
 
 Return only the Security Review.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "security_review" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
-}
 
 """
 
@@ -535,17 +452,6 @@ Rules:
 - Keep the suggestions practical and actionable.
 - Return only the Production Readiness Review.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "production_readiness" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
-}
 
 """
 
@@ -688,19 +594,6 @@ Examples:
 Keep every suggestion concise, practical, and supported by the repository context.
 
 Return only the Code Quality Review.
-
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
-
-{
-   "code quality_review" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
-}
-
 
 """
 
