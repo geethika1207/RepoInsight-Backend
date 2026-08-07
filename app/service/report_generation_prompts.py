@@ -1,17 +1,53 @@
 REPOSITORY_SUMMARY_PROMPT = """
 
 You are generating the Repository Summary section for a GitHub repository.
-You have already received the most relevant code and documentation from the repository.
-Your task is to write a concise, high-level summary that helps a developer understand the project without reading the entire repository.
 
-Focus only on:
+You have already received the most relevant repository context retrieved using semantic search.
+
+The retrieved repository context is the ONLY source of truth.
+
+Your goal is to help a developer quickly understand what this repository is, what it does, and why it exists.
+
+------------------------
+Priority of Information
+------------------------
+
+Generate the summary using the following priority:
+
+1. README.md
+2. Project documentation (docs/, INSTALL.md, SETUP.md, CONTRIBUTING.md or other documentation files)
+3. Configuration files that describe the application
+4. Source code
+
+If README.md is present in the retrieved repository context, use it as the primary source for understanding the repository.
+
+If README.md is not present, rely on the available documentation files.
+
+If neither README.md nor documentation files are available, infer the repository purpose ONLY from the retrieved source code.
+
+Do NOT mention which source you used.
+
+------------------------
+Focus On
+------------------------
+
+Describe:
+
 - What the repository implements.
 - What problem it solves.
 - What the application does.
-- Who or what it is built for.
+- The primary users or target audience.
+- The major capabilities or features supported by the application.
 - The overall purpose of the project.
 
-Do NOT explain:
+The summary should give a developer enough understanding to know what the project does without reading the entire repository.
+
+------------------------
+Do NOT Explain
+------------------------
+
+Do NOT discuss:
+
 - Architecture
 - API design
 - Database implementation
@@ -20,17 +56,30 @@ Do NOT explain:
 - Documentation quality
 - Production readiness
 - Improvement suggestions
+- Internal implementation details unless they are essential for understanding the project.
 
-Those topics are covered in separate reports.
+------------------------
+Rules
+------------------------
 
-Requirements:
-- Write exactly one paragraph.
-- Keep the summary between 4 to 6 sentences.
-- Use clear, professional language.
-- Avoid repeating information.
-- Do not assume or invent features that are not supported by the retrieved repository context.
-- Do not mention implementation details unless they are essential to understanding the project's purpose.
-- Base the summary only on the provided repository content.
+- Base the summary ONLY on the retrieved repository context.
+- The retrieved repository context is the ONLY source of truth.
+- Do NOT invent features.
+- Do NOT assume functionality that is not supported by the retrieved context.
+- If documentation is unavailable, infer the purpose carefully from the retrieved code.
+- Do NOT mention classes, functions, or file names unless they are essential.
+- Avoid implementation details.
+- Avoid repetition.
+- Use clear professional language.
+-Write exactly one paragraph.
+
+Write between 5 and 8 sentences.
+
+Include enough detail so that the summary explains:
+- the project's purpose,
+- its major functionality,
+- and its overall value,
+without discussing implementation details.
 
 """
 
@@ -40,366 +89,857 @@ TECHNOLOGY_STACK_PROMPT = """
 You are generating the Technology Stack Overview section for a GitHub repository.
 
 You have already received the most relevant repository files related to the project's technologies.
-Your task is to identify every technology used in the repository.
-Extract only technologies that are supported by the provided repository context.
-Organize the output using the following sections:
 
-programming_language
-backend_framework
-frontend_framework
-libraries
-database
-orm
-vector_database
-ai_llm_models
-embedding_models
-authentication
-cache
-background_jobs_queue
-cloud_deployment
-external_apis_services
-development_tools
-testing_frameworks
+Your task is to identify every technology that is explicitly supported by the retrieved repository context.
 
-Requirements:
-- Return only the technology name for each category.
-- Do NOT write explanations or complete sentences.
-- Do NOT describe how a technology works.
-- Do NOT explain why it is used.
-- Do NOT invent technologies that are not present in the repository.
-- If a category is not mentioned in the repository, write:
-  "Not mentioned in the repository."
-- Keep the output clean, short, and easy to scan.
-- Base the answer only on the provided repository context.
+Your goal is to extract technologies that are explicitly mentioned OR clearly evidenced by the retrieved repository context.
 
-Example Format:
+A technology is considered evidenced when it appears in:
+- dependency files
+- import statements
+- configuration files
+- deployment files
+- Docker files
+- environment configuration
+- initialization code
+- package managers
+- build configuration
 
-programming_language
-Python
+Evidence Rules (MANDATORY) :
 
-backend_framework
+- Extract technologies ONLY from the retrieved repository context.
+- Every reported technology must be directly supported by the retrieved files.
+Do NOT guess technologies that are not supported by the retrieved repository context.
+
+However, if a technology is clearly evidenced by imports, dependency files, configuration files, or initialization code, extract it.
+- Do NOT infer technologies based on common project structures.
+- Do NOT assume frameworks, databases, libraries, or tools.
+- Do NOT use prior knowledge about similar repositories.
+
+If a technology cannot be verified from the retrieved repository context, return exactly:
+
+"Not mentioned in the retrieved repository context."
+
+Do not report technologies unless they are directly supported by the retrieved repository context.
+
+Extract the Following Categories :
+
+
+- programming_language
+- backend_framework
+- frontend_framework
+- libraries
+- database
+- orm
+- vector_database
+- ai_llm_models
+- embedding_models
+- authentication
+- cache
+- background_jobs_queue
+- cloud_deployment
+- external_apis_services
+- development_tools
+- testing_frameworks
+
+
+Output Rules :
+
+
+- Return ONLY technology names.
+- Do NOT explain technologies.
+- Do NOT describe how they are used.
+- Do NOT write complete sentences.
+- Do NOT add extra categories.
+- Keep the output concise.
+- Base every field ONLY on the retrieved repository context.
+- Return valid JSON only.
+- Do NOT return markdown.
+- Do NOT wrap the response in code fences.
+- The response must begin with "{" and end with "}".
+
+Prefer exact technology names.
+
+Examples:
+
 FastAPI
-
-frontend_framework
-Not mentioned in the repository.
-
-libraries
-SQLAlchemy
-Pydantic
-Sentence Transformers
-
-database
 PostgreSQL
-
-orm
 SQLAlchemy
-
-vector_database
-PGVector
-
-ai_llm_models
-Llama 3.3 70B (Groq)
-
-embedding_models
-all-MiniLM-L6-v2
-
-authentication
-JWT
-
-cache
 Redis
-
-background_jobs_queue
-RQ
-
-cloud_deployment
+PGVector
+React
+Deepgram Streaming API
+Microsoft Edge TTS
+Groq API
+JWT
+Docker
 Render
 
-external_apis_services
-Groq API
-GitHub API
+Avoid generic names such as:
 
-development_tools
-Docker
-Git
+LLM
+Database
+ORM
+Authentication
+Cache
+Cloud
 
-testing_frameworks
-Not mentioned in the repository.
+Return ONLY valid JSON matching exactly this schema.
 
+{
+    "programming_language": "...",
+    "backend_framework": "...",
+    "frontend_framework": "...",
+    "libraries": [...],
+    "database": "...",
+    "orm": "...",
+    "vector_database": "...",
+    "ai_llm_models": [...],
+    "embedding_models": "...",
+    "authentication": "...",
+    "cache": "...",
+    "background_jobs_queue": "...",
+    "cloud_deployment": "...",
+    "external_apis_services": [...],
+    "development_tools": [...],
+    "testing_frameworks": "..."
+}
 
 """
-
 
 ARCHITECTURE_FLOW_PROMPT = """
 
 You are generating the Architecture Flow section for a GitHub repository.
-You have already received the most relevant source code and documentation related to the application's architecture.
-Your task is to explain how the application works internally by describing the flow of the system from beginning to end.
+
+You have already received the most relevant architecture-related source code and documentation.
+
+The retrieved repository context is the ONLY source of truth.
+
+Your task is to reconstruct the REAL application workflow by following how the system behaves from the moment a user starts using the application until the final output is produced.
+
+----------------------------------------
+IMPORTANT
+----------------------------------------
+
+This report is NOT an HTTP request lifecycle.
+
+Do NOT generate generic backend flows such as:
+
+FastAPI
+↓
+Router
+↓
+Service
+↓
+Database
+↓
+Response
+
+unless that is literally the application's primary workflow.
+
+Instead, reconstruct the application's BUSINESS WORKFLOW.
+
+Describe what the application is actually doing.
+
+----------------------------------------
+Evidence Rules
+----------------------------------------
+
+Every step must be supported by the retrieved repository context.
+
+Never invent components.
+
+Never assume framework behaviour.
+
+Never use generic backend execution flow.
+
+Only mention components that are actually present.
+
+----------------------------------------
+How to Build the Flow
+----------------------------------------
+
+Follow the application's real execution.
+
+Start from the user's action.
+
+Then continue following the application's behaviour.
+
+For example:
+
+- User starts an interview
+- AI generates questions
+- Speech is synthesized
+- User speaks
+- Speech is transcribed
+- LLM evaluates answers
+- Adaptive difficulty updates
+- Database stores results
+- Report is generated
+
+This is only an example of the TYPE OF FLOW.
+
+Do NOT copy this example.
+
+Instead reconstruct the repository's own workflow.
+
+----------------------------------------
+Flow Requirements
+----------------------------------------
+
+Every item should describe ONE meaningful application stage.
 
 Focus on:
 
-- Where the application starts.
-- How requests enter the application.
-- How different layers communicate with each other.
-- The execution flow through routers, services, models, utilities, databases, AI models, caching systems, queues, or external services if they exist.
-- How data moves through the application until the final response is returned.
+- User interactions
+- AI workflow
+- Business logic
+- External APIs
+- Database persistence
+- Background processing
+- Result generation
 
-Requirements:
+Avoid framework plumbing.
 
-- Explain the architecture in the exact order it executes.
-- Return the flow as an array where each array element represents ONE step only.
-- Each step should be short (1 to 2 concise sentences).
-- Do NOT include the arrow (↓) inside the JSON.
-- The frontend will display the arrows between the array items.
-- Mention only components that exist in the repository.
-- Base the explanation only on the provided repository context.
-- Do not invent missing components.
+Do NOT simply list routers, services or middleware.
 
-Do NOT:
-- Review the architecture.
-- Suggest improvements.
-- Discuss code quality.
-- Discuss security.
-- Discuss production readiness.
-- Repeat information.
+Explain WHY each stage exists in the application.
 
-Architecture Summary : 
+Each step should be 1-2 concise sentences.
 
-After the numbered flow, write a short concluding paragraph (2 to 4 sentences) summarizing how the complete architecture works from request initiation to response generation.
+Return the flow as an ordered array.
 
+----------------------------------------
+Architecture Summary
+----------------------------------------
+
+Write a 3-5 sentence summary describing how the complete application works from beginning to end.
+
+Summarize the application's business workflow.
+
+Do NOT summarize the framework structure.
+
+Do NOT review the architecture.
+
+Do NOT suggest improvements.
+
+Do NOT discuss security, production readiness or code quality.
+
+----------------------------------------
+Output
+----------------------------------------
+
+Return ONLY valid JSON.
+
+{
+    "architecture_flow":[
+        "...",
+        "...",
+        "..."
+    ],
+    "architecture_summary":"..."
+}
 
 """
-
 
 DATABASE_FLOW_PROMPT = """
 
 You are generating the Database Flow section for a GitHub repository.
 
-You have already received the most relevant database-related code and configuration from the repository.
-Your task is to explain how data is stored, organized, and retrieved throughout the application.
-Focus only on the database layer.
+You have already received the most relevant database-related repository files.
 
-Include:
+The retrieved repository context is the ONLY source of truth.
 
-- The database(s) used.
-- The main tables or collections.
-- What each table is responsible for storing.
-- Relationships between tables, if present.
-- How new data is inserted.
-- How existing data is updated.
-- How data is retrieved.
-- How embeddings or vector data are stored, if applicable.
-- How semantic search or vector search works, if applicable.
-- The complete data storage and retrieval flow from beginning to end.
+Your task is to reconstruct the ACTUAL DATA FLOW of the application.
 
-Requirements:
+This report must explain how application data is created, updated, stored, retrieved, and used throughout the application's lifecycle.
 
-- Explain the flow in the exact order it happens.
-- Use numbered steps.
-- Connect every step using a downward arrow (↓).
-- Keep each step short and easy to understand.
-- Mention only components that actually exist in the repository.
-- Do not invent database tables or relationships.
-- Base the explanation only on the provided repository context.
+------------------------------------------------
+IMPORTANT
+------------------------------------------------
 
-Do NOT include:
+This is NOT a database technology explanation.
 
-- Architecture review
-- API flow
-- Request flow
-- Security review 
-- Code quality review
-- Improvement suggestions
-- Production readiness
+Do NOT explain:
 
-Datbase summary : 
+- SQLAlchemy
+- ORM concepts
+- PostgreSQL
+- CRUD concepts
+- Relationships in general
+- Transactions
+- How ORMs work
 
-After the numbered flow, write a short conclusion (3 to 5 sentences) explaining how the application's database is structured and how data moves through the database during normal execution.
+Instead, explain HOW THE APPLICATION'S DATA MOVES.
 
+Think from the application's perspective.
 
-"""
+Example of the expected style (DO NOT COPY):
 
+User registers
+↓
+User information is stored in the Users table.
+↓
+User starts an interview.
+↓
+A new record is created in the Interview table.
+↓
+Each answer is stored in the Response table.
+↓
+Overall interview analysis is generated.
+↓
+Analysis is stored in the OverallAnalysis table.
+↓
+Interview history retrieves data from Interview, Response, and OverallAnalysis tables.
 
-ARCHITECTURE_REVIEW_PROMPT = """
+The above is ONLY an example of the style.
 
-You are reviewing the software architecture of a GitHub repository.
+Do NOT copy it.
 
-You have already received the most relevant architecture-related code and documentation from the repository.
-Your task is to evaluate the overall software architecture.
+Reconstruct the repository's own data flow.
 
-Review the architecture based on:
+------------------------------------------------
+Evidence Rules
+------------------------------------------------
 
-- Project structure
-- Separation of concerns
-- Layered architecture
-- Modularity
-- Scalability
-- Maintainability
-- Dependency management
-- Code organization
-- Reusability
-- Extensibility
-- Overall design decisions
+Every step must be directly supported by the retrieved repository context.
 
-Analyze only the provided repository context.
+Never invent:
 
-Do not invent missing components.
-Do not assume something is wrong simply because it is not implemented.
-Only make observations that are supported by the provided repository content.
+- tables
+- entities
+- collections
+- relationships
+- workflows
 
-Return the report in the following format:
+Never assume database behavior.
 
-## Overall Architecture
-Write a concise overview in 2 to 3 sentences describing the overall architecture and design of the project.
+Only describe tables and operations that actually exist.
 
-## Strengths
-Provide 3 to 5 points describing what has been implemented well.
-Focus on practical engineering strengths supported by the repository.
+------------------------------------------------
+Flow Requirements
+------------------------------------------------
 
-## Improvement Suggestions
+Follow the application's DATA LIFECYCLE.
 
-Provide 3 t0 5 constructive suggestions.
-Do not criticize the project unnecessarily.
-Only suggest improvements when there is clear evidence from the repository.
-For every suggestion, briefly explain why the improvement would be beneficial.
+Describe:
 
-Example style:
+- what user action causes data creation
+- which table/entity stores the data
+- when data is updated
+- when data is retrieved
+- which table is involved
+- how later stages reuse previously stored data
 
-• Consider separating business logic from router functions to improve maintainability.
-• Consider introducing a service abstraction for database operations to reduce code coupling.
-• Consider adding dependency injection for easier testing and scalability.
+Focus on the BUSINESS DATA FLOW.
 
-Keep every suggestion constructive, practical, and supported by the repository context.
+Avoid describing SQLAlchemy or ORM implementation.
 
-Return only the Architecture Review.
+Each step should describe ONE meaningful database event.
 
-"""
+Each step should be 1–2 concise sentences.
 
-
-DATABASE_REVIEW_PROMPT = """
-
-You are reviewing the database design of a GitHub repository.
-
-You have already received the most relevant database-related code and documentation from the repository.
-Your task is to evaluate the overall database implementation.
-Review the database based on:
-
-- Database schema design
-- Table or collection organization
-- Relationships between entities
-- Data modeling
-- SQLAlchemy or ORM implementation
-- Query organization
-- CRUD implementation
-- Transaction handling
-- Database normalization
-- Index usage (if present)
-- Performance considerations
-- Scalability
-- Maintainability
-- Vector database implementation (if present)
-- Embedding storage workflow (if present)
-
-Analyze only the provided repository context.
-Do not invent tables, fields, relationships, or database features that are not present.
-Do not assume something is incorrect simply because it is missing.
-Only make observations supported by the provided repository content.
-
-Return the report in the following format:
-
-## Overall Database Design
-
-Write a concise overview in 2 to 3 sentences describing the overall database design and implementation.
-
-## Strengths
-
-Provide 3 to 5 points describing the strengths of the database implementation.
-
-Focus on practical engineering strengths supported by the repository.
-
-## Improvement Suggestions
-
-Provide 3 to 5 constructive suggestions.
-
-Do not criticize the project unnecessarily.
-
-Only suggest improvements when there is clear evidence from the repository.
-
-For every suggestion, briefly explain why the improvement would be beneficial.
+Whenever possible, explicitly mention the table/entity name involved.
 
 Example style:
 
-• Consider adding indexes to frequently queried columns to improve query performance.
-• Consider separating database operations into a dedicated repository layer for better maintainability.
-• Consider using transactions for multi-step database operations to improve consistency.
-• Consider adding database constraints where appropriate to improve data integrity.
+User logs in.
+User information is retrieved from the Users table.
 
-Keep every suggestion practical, concise, and supported by the repository context.
+NOT:
 
-Return only the Database Review.
+SQLAlchemy queries the database.
 
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
+Return the flow as an ordered array.
 
-Do not add additional fields.
-Return only the keys shown below.
+------------------------------------------------
+Database Summary
+------------------------------------------------
+
+Write a concise summary (3–5 sentences).
+
+Summarize:
+
+- how the application's data is organized
+- how the tables/entities interact
+- how data moves throughout the application's execution
+
+Do NOT explain ORM implementation.
+
+Do NOT review the database.
+
+Do NOT suggest improvements.
+
+Do NOT discuss architecture.
+
+Do NOT discuss APIs.
+
+Do NOT discuss security.
+
+------------------------------------------------
+Output
+------------------------------------------------
+
+Return ONLY valid JSON.
 
 {
-   "overall_database_design" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
+    "database_flow": [
+        "...",
+        "...",
+        "..."
+    ],
+    "database_summary": "..."
 }
 
 """
 
+ARCHITECTURE_REVIEW_PROMPT = """
+
+You are generating the Architecture Review section for a GitHub repository.
+
+You have already received the most relevant architecture-related source code and documentation from the repository.
+
+The retrieved repository context is the ONLY source of truth.
+
+Your task is to perform an evidence-based software architecture review.
+
+Your objective is to analyze the architectural decisions made by the repository author, not to generate generic software engineering advice.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+- Every observation MUST be directly supported by the retrieved repository context.
+- Never invent strengths.
+- Never invent weaknesses.
+- Never assume architectural patterns.
+- Never use prior knowledge about similar repositories.
+- Never criticize something simply because it is missing.
+- If the repository does not provide enough evidence for a topic, do not mention it.
+
+------------------------------------------------
+Architecture Review Scope
+------------------------------------------------
+
+Analyze the repository for architectural characteristics such as:
+
+- Project structure
+- Module organization
+- Feature organization
+- Separation of concerns
+- Layered architecture
+- Business logic organization
+- Service abstraction
+- Dependency direction
+- Code coupling
+- Component cohesion
+- Reusability
+- Extensibility
+- Maintainability
+- Scalability
+- AI pipeline organization (if present)
+- Background job organization (if present)
+- Database abstraction (if present)
+
+Only discuss topics that are directly supported by repository evidence.
+
+------------------------------------------------
+Strength Rules
+------------------------------------------------
+
+List ONLY strengths that are clearly observable.
+
+Good examples:
+
+- Business logic is separated from API routing.
+- Authentication is isolated into dedicated modules.
+- AI components are organized independently from HTTP endpoints.
+- Services are reused across multiple features.
+- Repository follows feature-based organization.
+
+Avoid vague statements such as:
+
+- Good architecture
+- Well designed
+- Modular
+- Scalable
+- Maintainable
+
+unless the repository clearly demonstrates those properties.
+
+------------------------------------------------
+Improvement Rules
+------------------------------------------------
+
+Every improvement MUST be derived from an architectural observation.
+
+Never generate generic suggestions.
+
+Do NOT suggest:
+
+- Add comments
+- Improve error handling
+- Write tests
+- Add logging
+- Improve documentation
+
+unless those issues directly affect the architecture and are clearly supported by repository evidence.
+
+Instead, identify architectural issues such as:
+
+- Business logic mixed inside routers/controllers
+- Large router/controller modules with multiple responsibilities
+- Missing service abstraction
+- Tight coupling between modules
+- Duplicate business logic across features
+- Database access directly inside routing layer
+- Missing separation between business logic and persistence
+- Poor feature organization
+- Overly large modules
+- Cross-module dependencies
+- Missing abstraction layers
+- AI orchestration mixed with HTTP handling
+- Scalability bottlenecks caused by architecture
+- Maintainability issues caused by project organization
+
+Every suggestion MUST:
+
+- Begin with "Consider ..."
+- Reference the architectural issue found.
+- Explain briefly why the change would improve the architecture.
+- Be directly supported by the retrieved repository context.
+
+If no significant architectural improvements are supported by the retrieved repository context, return exactly:
+
+"No major architectural improvements identified from the retrieved repository context."
+
+------------------------------------------------
+Output Rules
+------------------------------------------------
+
+Return ONLY valid JSON.
+
+Do NOT return markdown.
+
+Do NOT return explanations.
+
+Return exactly:
+
+{
+    "overall_architecture": "...",
+    "strengths": [
+        "...",
+        "..."
+    ],
+    "improvement_suggestions": [
+        "...",
+        "..."
+    ]
+}
+
+"""
+
+DATABASE_REVIEW_PROMPT = """
+
+You are generating the Database Review section for a GitHub repository.
+
+You have already received the most relevant database-related source code, ORM models, schema definitions, migrations, and documentation from the repository.
+
+The retrieved repository context is the ONLY source of truth.
+
+Your task is to perform an evidence-based review of the database design and persistence layer.
+
+Your objective is to evaluate the quality of the database implementation based ONLY on repository evidence.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+- Every observation MUST be directly supported by the retrieved repository context.
+- Never invent tables, entities, collections, relationships, indexes, constraints, or ORM features.
+- Never assume common PostgreSQL, MongoDB, SQLAlchemy, Prisma, Django ORM, or other framework patterns.
+- Never use prior knowledge about similar repositories.
+- If the repository does not provide enough evidence for a topic, simply do not mention it.
+- Never criticize something simply because it is missing.
+
+------------------------------------------------
+Database Review Scope
+------------------------------------------------
+
+Review ONLY the database implementation found in the repository.
+
+Possible review areas include:
+
+- Database schema organization
+- Entity design
+- Table responsibilities
+- Relationships between entities
+- Foreign key organization
+- ORM model organization
+- Separation between persistence and business logic
+- CRUD implementation organization
+- Query organization
+- Data consistency
+- Database abstraction
+- Repository pattern (if present)
+- Vector database integration (if present)
+- Embedding storage workflow (if present)
+- Overall maintainability of the persistence layer
+
+Only discuss topics that are directly supported by repository evidence.
+
+------------------------------------------------
+Strength Rules
+------------------------------------------------
+
+List ONLY strengths that are clearly observable.
+
+Examples of good strengths:
+
+- Tables have clearly separated responsibilities.
+- Entity relationships are well organized.
+- Database models are modular.
+- ORM models are consistently implemented.
+- CRUD operations are organized into dedicated modules.
+- Persistence logic is separated from business logic.
+
+Avoid vague statements such as:
+
+- Good database
+- Well designed
+- Scalable
+- Maintainable
+- Optimized
+
+unless the repository clearly demonstrates those properties.
+
+------------------------------------------------
+Improvement Rules
+------------------------------------------------
+
+Every improvement suggestion MUST correspond to an actual database observation.
+
+Never generate generic database advice.
+
+Do NOT suggest:
+
+- Add indexes
+- Normalize tables
+- Use transactions
+- Add constraints
+- Improve performance
+- Optimize queries
+
+unless the retrieved repository context clearly demonstrates a problem related to those topics.
+
+Instead, focus on repository-specific database improvements such as:
+
+- Entity responsibilities are mixed across tables.
+- Relationships could be organized more clearly.
+- Persistence logic is tightly coupled with business logic.
+- CRUD operations are duplicated across multiple modules.
+- Database access is scattered instead of centralized.
+- ORM models could be organized into dedicated modules.
+- Similar entities could be abstracted.
+- Database layer could be separated more cleanly.
+
+Every suggestion MUST:
+
+- Begin with "Consider ..."
+- Refer to a specific database observation.
+- Explain briefly why the change would improve the database design.
+- Be directly supported by repository evidence.
+
+Before generating each suggestion, verify that repository evidence supports it.
+
+If repository evidence does not support the suggestion, DO NOT generate it.
+
+If no meaningful database improvements are supported by the retrieved repository context, return exactly:
+
+"No major database improvements identified from the retrieved repository context."
+
+------------------------------------------------
+Output Rules
+------------------------------------------------
+
+Return ONLY valid JSON.
+
+Do NOT return markdown.
+
+Do NOT return explanations.
+
+Return exactly:
+
+{
+    "overall_database_design": "...",
+    "strengths": [
+        "...",
+        "..."
+    ],
+    "improvement_suggestions": [
+        "...",
+        "..."
+    ]
+}
+
+"""
 
 SECURITY_REVIEW_PROMPT = """
 
 You are generating the Security Review section for a GitHub repository.
 
-You have already received the relevant repository files related to security.
-Evaluate the repository from a security perspective.
+You have already received the most relevant security-related source code, configuration files, infrastructure files, authentication modules, middleware, API routes, and documentation.
 
-Review the following areas:
+The retrieved repository context is the ONLY source of truth.
+
+Your task is to perform a professional repository security audit.
+
+Your objective is to identify EVERY meaningful security strength and EVERY meaningful security weakness that is directly supported by the retrieved repository context.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+- Every observation MUST be directly supported by repository evidence.
+- Never invent vulnerabilities.
+- Never assume vulnerabilities exist.
+- Never assume security mechanisms exist.
+- Never use generic OWASP recommendations unless repository evidence supports them.
+- Never use prior knowledge about similar projects.
+
+If repository evidence is insufficient, simply do not mention that topic.
+
+------------------------------------------------
+Security Review Scope
+------------------------------------------------
+
+Inspect every observable security aspect including (but not limited to):
 
 - Authentication implementation
-- Authorization and access control
-- JWT or session handling
-- Password hashing and storage
+- Authorization boundaries
+- Resource ownership validation
+- JWT implementation
+- Token lifecycle
+- Session handling
+- Password hashing
 - Secret management
-- Environment variable usage
-- Hardcoded API keys, passwords, secrets or tokens
-- Presence of .env or other sensitive configuration files
+- Environment variable handling
+- Hardcoded credentials
+- API key exposure
+- Database credential exposure
+- Private key exposure
+- Route protection
+- Middleware protection
+- File upload security
+- Request validation
+- Input sanitization
 - SQL Injection protection
-- Input validation
-- File upload validation (if present)
+- Prompt Injection protection (if AI exists)
+- LLM security
+- WebSocket security
 - CORS configuration
+- Rate limiting
 - Sensitive data exposure
-- Error handling and information leakage
-- Overall backend security practices
+- Logging sensitive information
+- Exception leakage
+- Configuration security
+- Dependency security
+- External API security
+- AI endpoint security
+- Business logic security
 
-If a .env file, API key, secret token, database password, JWT secret, private key, or any sensitive credential is found inside the repository, clearly mark it as a **Critical Security Issue** and recommend removing it immediately.
+Only discuss topics supported by repository evidence.
 
-If a security feature is not present in the repository even f it is required , state:
-"Not implemented in the repository."
+------------------------------------------------
+Critical Security Issues
+------------------------------------------------
 
-Return the response in this format:
+If the repository explicitly exposes:
 
-## Overall Security
-Write 2 to 3 sentences describing the overall security level of the project.
+- API keys
+- JWT secrets
+- Database passwords
+- Private keys
+- Cloud credentials
+- Tokens
+- Secrets
 
-## Strengths
-Provide 3 to 5 security strengths found in the repository.
+classify them as:
 
-## Improvement Suggestions
-Provide 3 to 5 practical security recommendations based only on the repository content.
+"Critical Security Issue"
 
-Do not invent issues that are not present.
-Do not mention architecture, database, API quality, or production readiness.
-Base your review only on the provided repository files.
+Explain why.
 
-Return only the Security Review.
+------------------------------------------------
+Strength Rules
+------------------------------------------------
 
+List ONLY strengths directly supported by repository evidence.
+
+Avoid generic strengths such as:
+
+- Uses JWT
+- Uses authentication
+
+Instead explain what is implemented well.
+
+Example:
+
+- Protected endpoints consistently verify authenticated users before executing business logic.
+
+------------------------------------------------
+Improvement Rules
+------------------------------------------------
+
+Generate improvements ONLY when repository evidence supports them.
+
+Every suggestion MUST:
+
+- Begin with "Consider ..."
+- Refer to a specific security observation.
+- Explain why it improves security.
+
+Do NOT generate generic advice like:
+
+- Add input validation
+- Prevent SQL Injection
+- Enable HTTPS
+
+unless repository evidence demonstrates those issues.
+
+Instead identify repository-specific improvements such as:
+
+- Missing ownership verification
+- Authentication bypass possibilities
+- Authorization inconsistencies
+- Hardcoded credentials
+- Exposed configuration
+- AI endpoint abuse risks
+- Missing token expiration checks
+- Weak secret management
+- Missing protection around sensitive endpoints
+- Excessive privilege exposure
+- WebSocket authentication gaps
+
+Before generating every suggestion verify repository evidence supports it.
+
+If evidence does not support the suggestion, DO NOT generate it.
+
+If no meaningful security improvements are supported by repository evidence return exactly:
+
+"No major security improvements identified from the retrieved repository context."
+
+------------------------------------------------
+Output
+------------------------------------------------
+
+Return ONLY valid JSON.
+
+{
+    "security_review":"...",
+    "strengths":[...],
+    "improvement_suggestions":[...]
+}
 
 """
 
@@ -408,76 +948,167 @@ PRODUCTION_READINESS_PROMPT = """
 
 You are generating the Production Readiness Review for a GitHub repository.
 
-You have already received the repository files that are relevant to production readiness.
-Evaluate whether this project is ready to be deployed and maintained in a real production environment.
+You have already received the most relevant deployment-related source code, configuration files, infrastructure files, CI/CD files, environment configuration, and documentation.
 
-Review the repository for the following:
+The retrieved repository context is the ONLY source of truth.
 
+Your task is to perform a professional production-readiness audit.
+
+Your objective is to determine how ready THIS repository is for deployment and long-term maintenance based ONLY on repository evidence.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+- Every observation MUST be directly supported by the retrieved repository context.
+- Never invent missing production issues.
+- Never assume a production feature should exist.
+- Never compare against generic production checklists.
+- Never recommend Docker, Redis, caching, monitoring, CI/CD, Kubernetes, health checks, background jobs, or performance optimization unless repository evidence directly justifies the recommendation.
+- Never use prior knowledge about similar repositories.
+
+If repository evidence is insufficient, simply do not mention that topic.
+
+------------------------------------------------
+Production Review Scope
+------------------------------------------------
+
+Review ONLY production-related implementation that is observable in the repository.
+
+Possible review areas include:
+
+- Deployment configuration
 - Environment variable management
 - Configuration management
+- Runtime configuration
 - Logging implementation
-- Error handling
 - Exception handling
-- Deployment configuration
-- Docker or containerization support
-- Performance optimizations
-- Caching implementation
-- Background job processing
-- Scalability considerations
-- Health check endpoints
-- Monitoring or observability support
-- Testing (unit, integration, API tests)
 - Dependency management
-- Reliability and maintainability
-- Production best practices
+- Production configuration separation
+- Deployment scripts
+- Infrastructure configuration
+- Containerization
+- Build process
+- Service startup
+- Scalability design
+- Reliability
+- Maintainability
+- Production stability
+- Fault tolerance
+- Operational readiness
 
-If a feature is not implemented or cannot be found in the repository even if it is required , clearly state:
-"Not implemented in the repository."
+Only discuss topics supported by repository evidence.
 
-Return the response in the following format:
+------------------------------------------------
+Strength Rules
+------------------------------------------------
 
-## Overall Production Readiness
-Write 2 to 3 sentences describing how ready this project is for production deployment.
+List ONLY strengths directly supported by repository evidence.
 
-## Strengths
-Provide 3 to 5 production-ready practices already implemented in the repository.
+Examples:
 
-## Improvment Suggestions
-Provide 3 to 5 practical recommendations that would improve the project's production readiness.
+- Environment variables are consistently used instead of hardcoded values.
+- Production configuration is separated from development configuration.
+- Deployment configuration is included.
+- Runtime configuration is centralized.
 
-Rules:
-- Base your review only on the provided repository content.
-- Do not invent features that are not present.
-- Do not discuss API quality, database design, architecture, security, or documentation unless they directly affect production readiness.
-- Keep the suggestions practical and actionable.
-- Return only the Production Readiness Review.
+Avoid generic statements such as:
 
+- Production ready
+- Scalable
+- Reliable
+
+unless repository evidence clearly demonstrates them.
+
+------------------------------------------------
+Improvement Rules
+------------------------------------------------
+
+Generate improvements ONLY when repository evidence supports them.
+
+Every suggestion MUST:
+
+- Begin with "Consider ..."
+- Refer to a specific production observation.
+- Explain briefly why it improves production readiness.
+
+Do NOT generate generic advice such as:
+
+- Add caching
+- Add monitoring
+- Improve performance
+- Use Docker
+- Add health checks
+- Add CI/CD
+- Add background jobs
+
+unless repository evidence clearly indicates those are genuine production limitations.
+
+Instead, identify repository-specific production issues such as:
+
+- Development and production configuration are mixed.
+- Environment configuration is duplicated.
+- Startup process is tightly coupled.
+- Deployment configuration is incomplete.
+- Runtime configuration is scattered.
+- Sensitive configuration is committed.
+- Services are difficult to deploy independently.
+- Production configuration is hardcoded.
+- Operational configuration is not centralized.
+- Repository lacks deployment consistency.
+
+Before generating every suggestion, verify repository evidence supports it.
+
+If evidence does not support the suggestion, DO NOT generate it.
+
+If no meaningful production improvements are supported by the retrieved repository context, return exactly:
+
+"No major production-readiness improvements identified from the retrieved repository context."
+
+------------------------------------------------
+Output
+------------------------------------------------
+
+Return ONLY valid JSON.
+
+{
+    "production_readiness":"...",
+    "strengths":[...],
+    "improvement_suggestions":[...]
+}
 
 """
 
-
 DOCUMENTATION_REVIEW_PROMPT = """
 
-You are generating the Documentation Review for a GitHub repository.
+You are generating the Documentation Review section for a GitHub repository.
 
-You have already received the repository files related to documentation.
-Your primary source should be README.md.
+You have already received the most relevant documentation-related content retrieved from the repository.
 
-If README.md is not present, use other documentation files such as:
+The retrieved repository context is the ONLY source of truth.
 
+Your task is to evaluate the project's documentation ONLY using the retrieved repository context.
+
+Possible documentation sources include:
+- README.md
 - docs/
 - CONTRIBUTING.md
 - INSTALL.md
 - SETUP.md
-- Any other documentation-related files found in the repository.
+- API documentation
+- Any other documentation files retrieved from the repository
 
-If README.md is not found, clearly mention:
-"README.md was not found in the repository. This review is based on the available documentation files and repository structure."
+If README.md is not found in the retrieved repository context, state:
 
-If no documentation files are found, clearly mention:
-"No documentation files were found in the repository. This review is generated using the available repository structure only."
+"README.md was not found in the retrieved repository context."
 
-Evaluate the documentation based on:
+If no documentation files are available in the retrieved repository context, state:
+
+"No documentation files were found in the retrieved repository context."
+
+Evaluate the documentation only on evidence found in the retrieved repository context.
+
+Review the following areas when they are present:
 
 - Project overview
 - Installation guide
@@ -493,223 +1124,373 @@ Evaluate the documentation based on:
 - Completeness
 - Ease of understanding for a new developer
 
-Return the report in the following format:
-
-## Overall Documentation
-
-Write 2 to 3 sentences describing the overall quality and completeness of the documentation.
-
-## Strengths
-
-Provide 3 to 5 strengths found in the documentation.
-
-## Improvement Suggestions
-
-Provide 3 to 5 practical suggestions to improve the documentation.
-
 Rules:
 
-- Base your review only on the provided repository content.
-- Do not invent documentation that does not exist.
-- If a section is missing, simply state that it is not documented.
-- Do not evaluate the source code itself unless it is necessary to understand the documentation.
-- Keep the suggestions practical and concise.
-
-Return only the Documentation Review.
+- Base every observation strictly on the retrieved repository context.
+- Do NOT use general software engineering assumptions.
+- Do NOT invent documentation that is not present.
+- Do NOT assume a section is missing simply because it was not retrieved.
+- If a section cannot be found in the retrieved repository context, state:
+  "Not found in the retrieved repository context."
+- Do NOT evaluate the source code unless it is necessary to understand the documentation.
+- Mention strengths only if they are supported by the retrieved repository context.
+- Suggest improvements ONLY when there is clear evidence from the retrieved repository context.
+- If no meaningful documentation improvements can be identified from the retrieved repository context, return:
+  "No significant documentation improvements identified from the retrieved repository context."
 
 Return ONLY valid JSON that exactly matches the following schema.
 Do not include markdown, code fences, explanations, or extra text.
-
 Do not add additional fields.
-Return only the keys shown below.
 
 {
-   "documentation_review" : "...",
-   "strengths" : [...],
-   "improvement_suggestions" : [...]
+    "documentation_review": "...",
+    "strengths": [
+        "...",
+        "..."
+    ],
+    "improvement_suggestions": [
+        "...",
+        "..."
+    ]
 }
 
-
 """
-
-
 CODE_QUALITY_PROMPT = """
 
-You are generating the Code Quality Review for a GitHub repository.
+You are generating the Implementation Quality Review section for a GitHub repository.
 
-You have already received the most relevant source code from the repository.
-Your task is to evaluate the overall quality of the codebase.
+You have already received the most relevant source code retrieved from the repository.
 
-Review the code based on:
+The retrieved repository context is the ONLY source of truth.
 
-- Readability
-- Naming conventions
-- Code organization
-- Modularity
-- Reusability
-- Function complexity
-- Class design
+Your task is to perform an evidence-based implementation quality review.
+
+Your objective is to analyze how the repository is implemented, identify engineering strengths, discover implementation problems, and generate repository-specific improvement suggestions.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+- Every observation MUST be directly supported by the retrieved repository context.
+- Never invent implementation issues.
+- Never assume bad coding practices.
+- Never use prior knowledge about similar repositories.
+- Never criticize something simply because it was not retrieved.
+- If repository evidence is insufficient for a topic, simply do not mention it.
+
+------------------------------------------------
+Implementation Review Scope
+------------------------------------------------
+
+Review ONLY implementation patterns supported by the repository.
+
+Possible review areas include:
+
+- Module organization
+- Feature organization
+- Business logic organization
+- Separation of reusable logic
+- Responsibility distribution
 - Code duplication
+- Reusable utilities
+- Helper function organization
+- Service implementation
+- API implementation consistency
+- Dependency coupling
+- Abstraction quality
+- Validation organization
+- Error propagation strategy
+- State management
 - Maintainability
-- Consistency
-- Best coding practices
-- Error handling
-- Comments and documentation
-- Overall implementation quality
+- Consistency across similar modules
 
-Analyze only the provided repository content.
+Only discuss topics that are directly supported by repository evidence.
 
-Do not invent issues that are not present.
-Do not review architecture, database design, API design, security, production readiness, or documentation.
+------------------------------------------------
+Strength Rules
+------------------------------------------------
 
-Return the response in the following format:
+List ONLY strengths that are clearly observable.
 
-## Overall Code Quality
+Examples of acceptable strengths:
 
-Write 2 to 3 sentences describing the overall quality of the codebase.
+- Business logic is consistently separated into service modules.
+- Similar endpoints reuse common helper functions.
+- Validation logic is centralized.
+- API implementation is consistent across modules.
+- Utility functions are reused instead of duplicated.
+- Feature modules follow a consistent organization.
 
-## Strengths
+Avoid vague statements such as:
 
-Provide 3 to 5 strengths found in the implementation.
+- Good code quality
+- Clean code
+- Readable code
+- Well written
+- Maintainable
 
-Focus only on strengths supported by the repository.
+unless repository evidence clearly demonstrates those properties.
 
-## Improvement Suggestions
+------------------------------------------------
+Improvement Rules
+------------------------------------------------
 
-Provide 3 to 5 practical suggestions that would improve the code quality.
+Every improvement MUST correspond to a concrete implementation issue observed in the retrieved repository context.
 
-For every suggestion:
+Never generate generic code review advice.
 
-- Explain what can be improved.
-- Briefly explain why the improvement is beneficial.
-- Suggest practical coding best practices when applicable.
+Do NOT suggest:
 
-Examples:
+- Add comments
+- Add docstrings
+- Improve naming
+- Improve readability
+- Reduce function complexity
+- Write tests
+- Add logging
 
-• Consider using more descriptive variable and function names to improve code readability.
-• Consider extracting repeated logic into reusable helper functions to reduce code duplication.
-• Consider adding type hints or docstrings to improve maintainability.
-• Consider reducing large functions into smaller reusable functions to improve readability.
+unless repository evidence explicitly demonstrates those issues.
 
-Keep every suggestion concise, practical, and supported by the repository context.
+Instead identify repository-specific implementation improvements such as:
 
-Return only the Code Quality Review.
+- Business logic duplicated across multiple modules.
+- Similar validation logic repeated in different endpoints.
+- Repeated database access logic.
+- Repeated API response construction.
+- Mixed responsibilities inside the same module.
+- Tight coupling between services.
+- Missing reusable abstractions.
+- Large feature modules containing unrelated responsibilities.
+- Similar helper logic implemented multiple times.
+- Inconsistent implementation across similar endpoints.
+
+Every suggestion MUST:
+
+- Begin with "Consider ..."
+- Refer to the observed implementation issue.
+- Explain briefly why the change would improve the implementation.
+- Be directly supported by the retrieved repository context.
+
+Before generating each suggestion, verify that repository evidence supports it.
+
+If evidence does not support the suggestion, DO NOT generate it.
+
+If no meaningful implementation improvements are supported by the retrieved repository context, return exactly:
+
+"No major implementation quality improvements identified from the retrieved repository context."
+
+------------------------------------------------
+Output Rules
+------------------------------------------------
+
+Return ONLY valid JSON.
+
+Do NOT return markdown.
+
+Do NOT return explanations.
+
+Return exactly:
+
+{
+    "overall_code_quality": "...",
+    "strengths": [
+        "...",
+        "..."
+    ],
+    "improvement_suggestions": [
+        "...",
+        "..."
+    ]
+}
 
 """
 
-
 CONTRIBUTIONS_PROMPT = """
-You are generating the Contribution Opportunities report for a GitHub repository.
 
-You have already received the repository files that are relevant for identifying possible contributions.
+You are generating the Contribution Opportunities section for a GitHub repository.
 
-Your task is to identify practical contribution opportunities for developers with different experience levels.
+You have already received the most relevant repository context retrieved using semantic search.
 
-Classify every contribution into one of the following categories:
+The retrieved repository context is the ONLY source of truth.
 
-Beginner : 
+Your task is to identify REAL, repository-specific contribution opportunities that could reasonably become GitHub Issues for contributors.
 
-These tasks should require minimal understanding of the repository and can usually be completed within 30 minutes to 2 hours.
+Your objective is NOT to invent work.
+Your objective is to discover implementation improvements that are directly supported by the retrieved repository context.
+
+------------------------------------------------
+Evidence Rules (MANDATORY)
+------------------------------------------------
+
+Every contribution MUST be supported by repository evidence.
+
+Evidence may include (but is NOT limited to):
+
+- TODO or FIXME comments
+- Partially implemented features
+- Repeated implementation patterns
+- Duplicate business logic
+- Duplicate validation logic
+- Duplicate CRUD operations
+- Duplicate helper functions
+- Large modules containing multiple responsibilities
+- Missing abstractions
+- Repeated API response generation
+- Repeated configuration
+- Inconsistent implementations
+- Repository organization
+- Documentation gaps
+- Existing modules that can naturally be extended
+- Performance bottlenecks visible from the implementation
+- Existing features that are clearly incomplete
+
+A contribution does NOT require an explicit TODO comment.
+
+You MAY infer contribution opportunities from repeated implementation patterns when the retrieved repository context provides sufficient evidence.
+
+------------------------------------------------
+Do NOT Generate
+------------------------------------------------
+
+Do NOT invent features.
+
+Do NOT invent bugs.
+
+Do NOT recommend generic engineering improvements.
+
+Do NOT suggest:
+
+- Add Docker
+- Add Redis
+- Add CI/CD
+- Add Monitoring
+- Add Logging
+- Add Unit Tests
+- Add Caching
+- Improve Performance
+- Improve Security
+
+unless the retrieved repository context clearly demonstrates that those are meaningful repository-specific contribution opportunities.
+
+Never generate generic GitHub contribution ideas.
+
+------------------------------------------------
+Difficulty Classification
+------------------------------------------------
+
+Beginner
+
+A beginner contribution should:
+
+- Require understanding only one file or a very small portion of the repository.
+- Usually take between 30 minutes and 2 hours.
 
 Examples include:
-- Missing comments or docstrings
-- TODO comments
-- Typo fixes
-- README improvements
-- Documentation improvements
-- Small bug fixes
-- Simple validation improvements
-- Renaming unclear variables or functions
-- Removing dead code
-- Adding logging
-- Minor refactoring
 
-Intermediate : 
+- Small documentation improvements
+- Small validation fixes
+- Removing duplicated helper logic
+- Cleaning repeated code
+- Minor UI/API consistency improvements
+- Completing small unfinished implementations
 
-These tasks require understanding one module or feature of the project and may take several hours or a few days.
+------------------------------------------------
 
-Examples include:
-- Refactoring duplicated code
-- Improving database queries
-- Adding a missing API endpoint
-- Improving authentication flow
-- Adding caching
-- Improving error handling
-- Writing unit tests
-- Performance improvements
-- Completing partially implemented features
+Intermediate
 
-Advanced : 
+An intermediate contribution should:
 
-These tasks require understanding multiple modules or the overall project architecture and may take several days.
+- Require understanding one module or one feature.
+- Usually take between 4 and 8 hours.
 
 Examples include:
+
+- Refactoring one module
+- Improving one feature
+- Reducing duplicated business logic
+- Improving one service layer
+- Extending an existing feature
+- Improving one subsystem
+
+------------------------------------------------
+
+Advanced
+
+An advanced contribution should:
+
+- Require understanding multiple modules or the overall architecture.
+- Usually take multiple days.
+
+Examples include:
+
 - Large feature development
-- Architecture redesign
-- Database migration
-- Background job systems
-- Distributed systems
-- Streaming or WebSocket support
-- AI pipeline improvements
-- Performance optimization across multiple modules
-- Security redesign
+- Cross-module refactoring
+- Architectural improvements
+- Multi-module optimization
+- Large workflow improvements
+- Repository-wide implementation improvements
 
-Return the report in the following format:
+------------------------------------------------
+For Every Contribution
+------------------------------------------------
 
-## Beginner Contributions
+Provide:
 
-Provide 3 to 5 beginner-friendly contribution ideas.
+- effort
+- improvement
+- why
 
-For each contribution include:
-- Estimated effort (for example: 30 to 60 minutes)
-- What should be improved
-- Why it is a good beginner task
+The "why" must explain why this task belongs in that difficulty level.
 
-## Intermediate Contributions
+The "improvement" should describe a concrete repository-specific implementation opportunity.
 
-Provide 3 to 5 intermediate contribution ideas.
+------------------------------------------------
+Rules
+------------------------------------------------
 
-For each contribution include:
-- Estimated effort (for example: 4 to 8 hours)
-- What should be improved
-- Why it requires intermediate knowledge
+- Base every contribution ONLY on the retrieved repository context.
+- Never use prior knowledge about similar repositories.
+- Never fabricate work simply to populate the output.
+- Prefer implementation improvements over generic engineering advice.
+- Multiple contributions may originate from the same module if they solve different implementation problems.
+- Return ALL meaningful contribution opportunities supported by the retrieved repository context.
+- Do NOT artificially limit the number of contributions.
+- If a category has no meaningful contribution opportunities supported by the retrieved repository context, return an empty list [].
 
-## Advanced Contributions
+------------------------------------------------
+Output Rules
+------------------------------------------------
 
-Provide 3 to 5 advanced contribution ideas.
+Return ONLY valid JSON.
 
-For each contribution include:
-- Estimated effort (for example: 2 to 5 days)
-- What should be improved
-- Why it requires advanced knowledge
+Do NOT return markdown.
 
-If no valid contribution opportunities are found for a category, clearly state:
+Do NOT return explanations.
 
-"There are no Beginner Contributions in this repository."
-"There are no Intermediate Contributions in this repository."
-"There are no Advanced Contributions in this repository."
-
-Do not invent contribution ideas just to fill the section.
-
-Rules:
-
-- Base every suggestion only on the provided repository content.
-- Do not invent features or issues that are not present.
-- Classify tasks based on the amount of repository knowledge required, not the number of lines of code.
-- Suggestions should be practical, specific, and actionable.
-- Avoid generic advice such as "improve the project" or "write better code."
-- Return only the Contribution Opportunities report.
-
-Return ONLY valid JSON that exactly matches the following schema.
-Do not include markdown, code fences, explanations, or extra text.
-
-Do not add additional fields.
-Return only the keys shown below.
+Return exactly:
 
 {
-   "beginner_contributions" : [...],
-   "intermediate_contributions" : [...],
-   "advanced_contributions" : [...]
+    "beginner_contributions": [
+        {
+            "effort": "...",
+            "improvement": "...",
+            "why": "..."
+        }
+    ],
+    "intermediate_contributions": [
+        {
+            "effort": "...",
+            "improvement": "...",
+            "why": "..."
+        }
+    ],
+    "advanced_contributions": [
+        {
+            "effort": "...",
+            "improvement": "...",
+            "why": "..."
+        }
+    ]
 }
 
 """

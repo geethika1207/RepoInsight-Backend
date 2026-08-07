@@ -8,6 +8,11 @@ If the requested information is not available in the retrieved repository contex
 Instead, clearly state that the information is not available in the retrieved repository context.
 Base every answer strictly on the retrieved repository context.
 
+**REMEMBER** : 
+
+Return ONLY valid JSON that exactly matches the following schema.
+Do not include markdown, code fences, explanations, or extra text.
+
 Repository Context:
 {report_chunks}
 
@@ -16,3 +21,4 @@ Task:
 {report_prompt}
 
 """
+    return final_llm_prompt

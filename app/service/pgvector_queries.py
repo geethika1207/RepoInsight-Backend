@@ -1,251 +1,320 @@
 REPOSITORY_SUMMARY_QUERY = """
-Analyze this GitHub repository and generate a complete repository summary.
+Retrieve the repository content that best explains what this project is.
 
-Focus on:
-- The overall purpose of the project.
-- The main problem it solves.
-- The technologies and frameworks used.
-- The overall project structure.
-- The important modules and how they work together.
-- The workflow of the application from start to finish.
-- Any AI models, APIs, databases, caching systems, queues, or external services used.
-- Overall architecture at a high level.
+Highest priority:
+- README.md
+- Project overview
+- Introduction
+- Repository description
+- Documentation explaining the purpose of the project
 
-The summary should help someone understand the complete repository without reading every file.
+If those are unavailable, retrieve source code that clearly reveals:
 
-Return a structured repository summary.
+- the application's primary purpose
+- the main workflow
+- who the application is built for
+- the problem it solves
+- the major capabilities exposed by the repository
+
+Prioritize high-level descriptions over implementation details.
+
+The goal is to retrieve enough context to understand the project without reading the entire repository.
 """
-
 
 TECHNOLOGY_STACK_QUERY = """
-What technologies are used in this repository?
+Retrieve repository files that explicitly declare technologies used by the project.
 
-Identify the complete technology stack, including:
+Highest priority:
 
-- Programming languages
-- Backend frameworks
-- Frontend frameworks
-- Libraries and packages
-- Databases
+- requirements.txt
+- pyproject.toml
+- package.json
+- poetry.lock
+- Pipfile
+- Dockerfile
+- docker-compose.yml
+- render.yaml
+- vercel.json
+- README.md
+- environment configuration
+- import statements
+- initialization files
+
+Retrieve evidence for:
+
+- programming language
+- frameworks
+- libraries
+- databases
 - ORMs
-- AI / LLM models
-- Embedding models
-- Vector databases
-- Cache systems
-- Background job queues
-- Authentication libraries
-- SDKs
-- Cloud services
-- Deployment platforms
-- External APIs or third-party services
-- Testing frameworks
-- DevOps tools
+- authentication
+- cache
+- queues
+- AI models
+- embedding models
+- vector databases
+- deployment platforms
+- external APIs
+- development tools
+- testing frameworks
 
-Retrieve the repository files that contain information about these technologies.
+Only retrieve files that directly prove the technology exists.
 """
 
-
 ARCHITECTURE_FLOW_QUERY = """
-Retrieve the repository content required to understand the overall architecture and application flow.
+Retrieve the repository files required to reconstruct the application's actual execution flow.
 
-Focus on:
-- application entry points
-- request flow
-- routing
+Prioritize files that contain the application's runtime flow, including:
+
+- application entry point
+- startup logic
+- routers
+- endpoints
 - controllers
 - services
 - business logic
-- utilities
-- models
-- database layer
-- folder structure
-- dependency relationships
-- communication between components
-- application startup
-- data flow between modules
+- middleware
+- dependency injection
+- authentication flow
+- AI pipeline
+- database interactions
+- cache usage
+- background workers
+- utilities invoked during request execution
 
-The goal is to retrieve the repository content needed to explain how the application works from start to finish.
+Retrieve enough connected code so the complete execution path can be reconstructed from the first incoming request until the final response.
+
+Avoid retrieving isolated utility files that are never used during execution.
 """
-
 
 ARCHITECTURE_REVIEW_QUERY = """
-Retrieve the parts of the repository required to evaluate the software architecture.
+Retrieve repository content that best represents the overall software architecture.
 
-Focus on:
-- modularity
-- separation of concerns
-- scalability
-- maintainability
-- folder organization
-- code organization
-- dependency management
-- project structure
-- design decisions
+Prioritize:
 
-The goal is to review the architecture and identify strengths, weaknesses, and possible improvements.
+- folder structure
+- module organization
+- routers
+- services
+- controllers
+- dependency injection
+- middleware
+- project layout
+- architectural patterns
+- reusable modules
+- business logic organization
+
+Retrieve enough evidence to evaluate architectural decisions rather than individual functions.
+
+Avoid retrieving unrelated utility implementations unless they illustrate architectural organization.
 """
-
 
 DATABASE_FLOW_QUERY = """
-Retrieve the code related to the database layer of this repository.
+Retrieve repository files that describe how application data moves through the database during execution.
 
-Focus on:
-- database models
-- schemas
-- tables or collections
-- relationships between tables
-- SQLAlchemy or ORM implementation
-- CRUD operations
-- how data is inserted
-- how data is updated
-- how data is retrieved
-- query execution
-- transactions
-- migrations
-- vector database usage (if present)
-- embedding storage (if present)
-- semantic search workflow (if present)
+Prioritize:
 
-The goal is to explain how data is stored, organized, and retrieved inside the database from beginning to end.
+- ORM models
+- schema definitions
+- repositories
+- CRUD services
+- interview creation flow
+- user creation flow
+- response storage
+- analysis generation
+- history retrieval
+- update operations
+
+Retrieve the complete lifecycle of data:
+
+creation
+↓
+
+storage
+
+↓
+
+updates
+
+↓
+
+retrieval
+
+↓
+
+final usage
+
+The goal is to reconstruct the application's database workflow rather than explaining ORM usage.
 """
-
 
 DATABASE_REVIEW_QUERY = """
-Retrieve the database-related code required to evaluate the database design.
+Retrieve repository content required to evaluate the database implementation.
 
-Focus on:
-- schema design
-- normalization
+Prioritize:
+
+- ORM models
+- database schema
 - relationships
-- constraints
-- indexes
-- query efficiency
-- ORM usage
+- repositories
+- CRUD implementations
+- migrations
+- query implementations
 - transaction handling
-- scalability
-- security
+- indexes
+- constraints
 
-The goal is to review the database implementation and identify improvements.
+Retrieve enough evidence to review:
+
+- schema organization
+- data modeling
+- entity relationships
+- maintainability
+- consistency
+- database design quality
+
+Avoid retrieving unrelated application logic.
 """
 
-
 SECURITY_REVIEW_QUERY = """
-Retrieve the implementation related to application security.
+Retrieve repository content related to implemented security mechanisms.
 
-Focus on:
-- authentication
+Prioritize:
+
+- authentication implementation
 - authorization
 - JWT handling
 - password hashing
-- secrets management
+- login flow
+- middleware
+- dependency injection
 - environment variables
-- SQL injection prevention
+- configuration
+- CORS
+- secret management
+- permission checks
+- protected endpoints
 - input validation
-- API protection
-- file handling
-- sensitive data exposure
+- upload validation
+- exception handling
+- API key usage
 
-The goal is to evaluate the security practices used throughout the repository.
+Retrieve code that demonstrates security implementation, potential vulnerabilities, or missing protections.
+
+Avoid retrieving unrelated business logic.
 """
-
 
 PRODUCTION_REVIEW_QUERY = """
-Retrieve the implementation that determines whether this project is production ready.
+Retrieve repository content related to production deployment and operational readiness.
 
-Focus on:
+Prioritize:
+
+- deployment configuration
+- Docker
+- Render
+- Vercel
+- startup configuration
 - logging
 - exception handling
-- configuration management
-- deployment support
-- Docker
 - environment configuration
-- scalability
-- monitoring
-- caching
+- configuration management
+- health endpoints
+- worker processes
 - background jobs
-- testing
-- performance optimization
+- caching
+- monitoring
+- scalability
+- production settings
 
-The goal is to evaluate how close the repository is to production deployment.
+Retrieve implementation that directly impacts deploying or operating the application in production.
+
+Avoid generic application code.
 """
 
-
 DOCUMENTATION_REVIEW_QUERY = """
-Retrieve the repository documentation required to evaluate the project documentation.
+Retrieve repository documentation for evaluating documentation quality.
 
-Focus primarily on:
+Highest priority:
+
 - README.md
 
-Also retrieve other documentation files when available, including:
+Then retrieve:
+
 - docs/
 - CONTRIBUTING.md
 - INSTALL.md
 - SETUP.md
-- Any other documentation-related files
+- API documentation
+- architecture documentation
+- deployment documentation
 
-Focus on documentation related to:
+Retrieve documentation describing:
 
 - project overview
-- installation instructions
-- setup guide
-- usage examples
-- API documentation
-- project structure explanation
-- environment configuration
-- contribution guide
-- completeness
-- clarity
+- installation
+- setup
+- usage
+- configuration
+- API usage
+- contribution process
+- project structure
 
-Avoid retrieving normal source code unless it is directly required to understand the documentation.
+Avoid retrieving implementation code unless documentation references it directly.
 """
-
 
 CODE_QUALITY_REVIEW_QUERY = """
-Retrieve the repository implementation required to evaluate the overall code quality.
+Retrieve representative source code from across the repository for evaluating overall code quality.
 
-Focus on:
-- readability
-- naming conventions
-- code organization
-- modularity
-- reusability
-- code duplication
-- maintainability
-- function complexity
-- class design
+Prioritize code that represents:
+
+- routers
+- services
+- business logic
+- models
+- utilities
+- authentication
+- database access
+- AI modules
+
+Retrieve enough code to evaluate:
+
+- organization
 - consistency
-- error handling
-- comments
-- coding best practices
+- naming
+- modularity
+- duplication
+- maintainability
+- complexity
+- reuse
 
-The goal is to retrieve the repository content required to evaluate how well the code is written and implemented.
+The retrieved code should represent the repository as a whole rather than isolated files.
 """
 
-
 CONTRIBUTION_QUERY = """
-Retrieve the repository implementation required to identify contribution opportunities.
+Retrieve repository content that reveals realistic contribution opportunities.
 
-Focus on:
-- unfinished modules
-- TODO comments
-- FIXME comments
-- missing features
-- feature gaps
-- repetitive code
-- duplicated logic
-- refactoring opportunities
-- optimization opportunities
-- missing documentation
-- missing comments or docstrings
-- missing unit or integration tests
+Prioritize evidence such as:
+
+- TODO
+- FIXME
 - placeholder implementations
-- partially implemented functionality
-- code marked for future improvements
+- NotImplemented
+- pass statements
+- incomplete modules
+- duplicated logic
+- repeated code
+- feature gaps
+- commented-out functionality
+- missing validation
+- missing error handling
+- partially implemented workflows
+- unimplemented endpoints
+- inconsistent implementations
 - technical debt
+- areas marked for future work
 
-The goal is to retrieve the repository content required to identify contribution opportunities suitable for:
-- Beginner developers
-- Intermediate developers
-- Advanced developers
+Also retrieve implementation where architectural reviews, database reviews, security reviews, production reviews, or code quality reviews indicate concrete improvement opportunities.
 
+The goal is to retrieve repository evidence that can be transformed into beginner, intermediate, and advanced contribution ideas.
+
+Do not retrieve generic project files that contain no actionable improvement opportunities.
 """

@@ -6,6 +6,7 @@ from ..db import models
 from ..schemas import repository
 from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
 from ..service import pgvector_queries, build_report_query, combine_chunks_prompts, report_generation_prompts, prompt_preprocessor
+from ..service import llm_service
 import subprocess
 from pathlib import Path
 
@@ -202,3 +203,29 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     contributions_analysis_llm_prompt = prompt_preprocessor.final_prompt(contribution_relevant_chunks, contributions_analysis_prompt)
 
+
+    #llm_report_generation
+
+    summary_technology_stack = llm_service.final_report(summary_technology_stack_llm_prompt)
+
+    architecture_flow_database_flow = llm_service.final_report(architecture_flow_database_flow_llm_prompt)
+
+    architecture_review_code_quality_review = llm_service.final_report(architecture_review_code_quality_review_llm_prompt)
+
+    production_review_security_review = llm_service.final_report(production_review_security_review_llm_prompt)
+
+    database_review = llm_service.final_report(database_review_llm_prompt)
+
+    documentation_review = llm_service.final_report(documentation_review_llm_prompt)
+
+    contributions_analysis = llm_service.final_report(contributions_analysis_llm_prompt)
+
+    return {
+        "project_overview": summary_technology_stack,
+        "architecture_flow_database_flow": architecture_flow_database_flow,
+        "architecture_review_code_quality_review": architecture_review_code_quality_review,
+        "production_security_review": production_review_security_review,
+        "database_review": database_review,
+        "documentation_review": documentation_review,
+        "contributions_analysis": contributions_analysis,
+    }
