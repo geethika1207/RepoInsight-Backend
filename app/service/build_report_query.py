@@ -5,7 +5,7 @@ from ..db import models
 
 async def report_query(repo_id: int, embed_query: list, db: AsyncSession):
 
-    result = await db.query(
+    result = await db.execute(
         select(models.Chunk)
         .where(models.Chunk.repository_id == repo_id)
         .order_by(
