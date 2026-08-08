@@ -2,12 +2,8 @@ from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def embedding_chunks(chunks):
+def embedding_chunks(queries):
 
-    for chunk in chunks:
+    embedding_chunk = model.encode(queries)
 
-        embedding_chunk = model.encode(chunk["chunk_text"])
-
-        chunk["embedding"] = embedding_chunk.tolist()
-
-    return chunks 
+    return embedding_chunk.tolist()

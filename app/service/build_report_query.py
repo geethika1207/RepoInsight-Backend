@@ -1,23 +1,19 @@
-from sentence_transformers import SentenceTransformer
-from ..db.database import get_db
-from sqlalchemy.orm import session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from ..db import models
-from typing import List
-from ..schemas.repository import Analysis
-model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def report_query(repo_id:int, query:str, db:session):
 
-    embed_query = model.encode(query).tolist()
+async def report_query(repo_id: int, embed_query: list, db: AsyncSession):
 
-    chunks = (
-        db.query(models.Chunk)
-        .filter(models.Chunk.repository_id == repo_id)
+    result = await db.query(
+        select(models.Chunk)
+        .where(models.Chunk.repository_id == repo_id)
         .order_by(
             models.Chunk.chunk_embedding.cosine_distance(embed_query)
         )
         .limit(16)
-        .all() 
     )
 
-    return [chunk.chunk_text for chunk in chunks]   # Since it returns list of strings its acceptable for dict.fromkeys() .. if it is list of dicts we have toconvert it into list of strings but now its exactly has right format ..
+    chunks = result.scalars().all()
+
+    return [chunk.chunk_text for chunk in chunks]

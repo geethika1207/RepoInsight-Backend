@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..core.security import get_current_user 
 from ..db.database import get_db
-from sqlalchemy.orm import session
+from sqlalchemy.ext.asyncio import AsyncSession
 from ..db import models
 from ..schemas import repository
 from ..service import create_repo_chunks, extract_repo_files, generate_chunk_embeddings
@@ -13,7 +13,7 @@ from pathlib import Path
 router = APIRouter()
 
 @router.post("/repository_analysis")
-def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_db), current_user=Depends(get_current_user)):
+def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
 
     github_url = repository_url.url.rstrip("/")
 
@@ -85,7 +85,41 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
     db.commit()
 
 
-# Retrieve relevant chunks 
+
+    # report queries
+
+    summary_query = pgvector_queries.REPOSITORY_SUMMARY_QUERY
+    technology_stack_query = pgvector_queries.TECHNOLOGY_STACK_QUERY
+    architecture_flow_query = pgvector_queries.ARCHITECTURE_FLOW_QUERY
+    architecture_review_query = pgvector_queries.ARCHITECTURE_REVIEW_QUERY
+    database_flow_query = pgvector_queries.DATABASE_FLOW_QUERY
+    database_review_query = pgvector_queries.DATABASE_REVIEW_QUERY
+    security_review_query = pgvector_queries.SECURITY_REVIEW_QUERY
+    production_review_query = pgvector_queries.PRODUCTION_REVIEW_QUERY 
+    documentation_review_query = pgvector_queries.DOCUMENTATION_REVIEW_QUERY
+    code_quality_review_query = pgvector_queries.CODE_QUALITY_REVIEW_QUERY
+    contributions_query = pgvector_queries.CONTRIBUTION_QUERY  
+
+    queries = []
+
+    queries.extend([
+        summary_query,
+        technology_stack_query,
+        architecture_flow_query,
+        architecture_review_query,
+        database_flow_query,
+        database_review_query,
+        security_review_query,
+        production_review_query,
+        documentation_review_query,
+        code_quality_review_query,
+        contributions_query
+    ])
+
+    reports_queries = generate_chunk_embeddings.embedding_chunks(queries)
+
+
+    # Retrieve relevant chunks 
 
     repo_id = new_repository.id
 
@@ -220,12 +254,43 @@ def get_repository(repository_url:repository.RequestURL, db:session=Depends(get_
 
     contributions_analysis = llm_service.final_report(contributions_analysis_llm_prompt)
 
-    return {
-        "project_overview": summary_technology_stack,
-        "architecture_flow_database_flow": architecture_flow_database_flow,
-        "architecture_review_code_quality_review": architecture_review_code_quality_review,
-        "production_security_review": production_review_security_review,
-        "database_review": database_review,
-        "documentation_review": documentation_review,
-        "contributions_analysis": contributions_analysis,
-    }
+    # return {
+    #     "project_overview": summary_technology_stack,
+    #     "architecture_flow_database_flow": architecture_flow_database_flow,
+    #     "architecture_review_code_quality_review": architecture_review_code_quality_review,
+    #     "production_security_review": production_review_security_review,
+    #     "database_review": database_review,
+    #     "documentation_review": documentation_review,
+    #     "contributions_analysis": contributions_analysis,
+    # }
+
+
+    # report queries
+
+    summary_query = pgvector_queries.REPOSITORY_SUMMARY_QUERY
+    technology_stack_query = pgvector_queries.TECHNOLOGY_STACK_QUERY
+    architecture_flow_query = pgvector_queries.ARCHITECTURE_FLOW_QUERY
+    architecture_review_query = pgvector_queries.ARCHITECTURE_REVIEW_QUERY
+    database_flow_query = pgvector_queries.DATABASE_FLOW_QUERY
+    database_review_query = pgvector_queries.DATABASE_REVIEW_QUERY
+    security_review_query = pgvector_queries.SECURITY_REVIEW_QUERY
+    production_review_query = pgvector_queries.PRODUCTION_REVIEW_QUERY 
+    documentation_review_query = pgvector_queries.DOCUMENTATION_REVIEW_QUERY
+    code_quality_review_query = pgvector_queries.CODE_QUALITY_REVIEW_QUERY
+    contributions_query = pgvector_queries.CONTRIBUTION_QUERY  
+
+    queries = []
+
+    queries.extend([
+        summary_query,
+        technology_stack_query,
+        architecture_flow_query,
+        architecture_review_query,
+        database_flow_query,
+        database_review_query,
+        security_review_query,
+        production_review_query,
+        documentation_review_query,
+        code_quality_review_query,
+        contributions_query
+    ])

@@ -1,11 +1,14 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from .db.database import engine, Base
 from .routers import auth, repository, practice
 
-#Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
-app = FastAPI()
-
+app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(repository.router)
