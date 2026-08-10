@@ -423,24 +423,6 @@ All endpoints communicate using **JSON** and are secured using **JWT-based authe
 
 ---
 
-## Conclusion
-
-RepoInsight demonstrates how retrieval-augmented generation can be engineered to turn an entire codebase into a structured, evidence-grounded intelligence report without requiring a developer to manually read through every file.
-
-By integrating repository ingestion, semantic chunking, vector retrieval, and LLM-based synthesis into a unified pipeline, the project explores practical approaches for building scalable, trustworthy AI tooling for software understanding.
-
-This repository reflects an end-to-end implementation of modern RAG system engineering — from repository ingestion and vector indexing to category-scoped retrieval and structured report generation.
-
----
-
-**Developed by Geethika Tammineni**
-
-Aspiring Software Engineer | Backend Development | AI Systems
-
-If you found this project interesting, feel free to connect, contribute, or share feedback.
-
----
-
 ## 💻 Local Setup & Execution
 
 1. Clone the repository:
@@ -458,3 +440,21 @@ If you found this project interesting, feel free to connect, contribute, or shar
    ```
 
 Once running, open `http://127.0.0.1:8000/docs` to interact with the system via the native Swagger UI routes!
+
+---
+
+## Conclusion
+
+RepoInsight demonstrates how retrieval-augmented generation can be engineered to turn an entire codebase into a structured, evidence-grounded intelligence report without requiring a developer to manually read through every file.
+
+By integrating repository ingestion, semantic chunking, vector retrieval, and LLM-based synthesis into a unified pipeline, the project explores practical approaches for building scalable, trustworthy AI tooling for software understanding.
+
+This repository reflects an end-to-end implementation of modern RAG system engineering — from repository ingestion and vector indexing to category-scoped retrieval and structured report generation.
+
+---
+
+**Developed by Geethika Tammineni**
+
+Aspiring Software Engineer | Backend Development | AI Systems
+
+If you found this project interesting, feel free to connect, contribute, or share feedback.
