@@ -2,11 +2,11 @@
 
 ## An AI Repository Intelligence System for Automated Codebase Analysis
 
-> A retrieval-augmented AI platform that reads any public GitHub repository and generates a structured intelligence report — covering purpose, architecture, database design, security, production readiness, documentation, and contribution opportunities — without a developer having to read the entire codebase.
+> **Why I'm building this:** Onboarding onto a new codebase takes hours of manual tracing. I am building RepoInsight as an active project to automate this process. It takes any public GitHub repository and generates a structured intelligence report covering architecture, security, database design, and contribution zones, without a developer having to read every file from scratch.
 
 RepoInsight is an AI-powered repository analysis platform designed to bridge the gap between raw source code and actionable engineering understanding. Instead of manually tracing through files, the platform clones a repository, semantically indexes its contents, and generates a multi-section report that explains what the project does, how it's built, and where it can be improved.
 
-The system employs a Retrieval-Augmented Generation (RAG) pipeline consisting of repository ingestion, chunking, vector embedding, similarity-based retrieval, and Large Language Model (LLM) reasoning to ground every generated section strictly in the retrieved repository context, minimizing hallucination and keeping reports evidence-based.
+To make this work, I built a Retrieval-Augmented Generation (RAG) pipeline that handles repository ingestion, sliding-window chunking, vector embedding generation, and similarity retrieval. This setup ensures that the LLM grounds its analysis strictly in real source-code files, keeping the generated reports evidence-based and free of hallucinations.
 
 ---
 
@@ -93,14 +93,12 @@ Structured JSON Report
 
 ---
 
-## ⚙️ Architectural Principles
+## ⚙️ Key Design Choices
 
-- ⚡ Retrieval-Augmented Generation
-- 📚 Category-Scoped Semantic Retrieval
-- 🧠 Evidence-Grounded Report Synthesis
-- 🔄 Modular Pipeline Stages
-- 📡 Structured JSON Output Contracts
-- 💾 Persistent Per-Repository Vector Storage
+- **Targeted Retrieval:** Category-scoped semantic lookups to isolate context.
+- **Code Grounding:** Multi-file evidence matching to eliminate model fabrications.
+- **Data Integrity:** Strict JSON-only schema outputs parsed programmatically by the backend.
+- **Persistence:** Local per-repository vector storage for fast repeat indexing.
 
 ---
 
@@ -440,3 +438,23 @@ This repository reflects an end-to-end implementation of modern RAG system engin
 Aspiring Software Engineer | Backend Development | AI Systems
 
 If you found this project interesting, feel free to connect, contribute, or share feedback.
+
+---
+
+## 💻 Local Setup & Execution
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com
+   cd RepoInsight
+   ```
+2. Install the backend dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Start the FastAPI development server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+Once running, open `http://127.0.0.1:8000/docs` to interact with the system via the native Swagger UI routes!
