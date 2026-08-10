@@ -13,7 +13,7 @@ from pathlib import Path
 router = APIRouter()
 
 @router.post("/repository_analysis")
-def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+async def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
 
     github_url = repository_url.url.rstrip("/")
 
@@ -56,34 +56,35 @@ def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depe
     )
 
     db.add(new_repository)
-    db.commit()
-    db.refresh(new_repository)
+    await db.commit()
+    await db.refresh(new_repository)
 
 
     repository_files = extract_repo_files.read_repository(destination)
 
     repository_chunks = create_repo_chunks.chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
 
-    embedded_chunks = generate_chunk_embeddings.embedding_chunks(repository_chunks)
+    chunk_texts = [chunk["chunk_text"] for chunk in repository_chunks]
 
+    chunk_embeddings = generate_chunk_embeddings.embedding_chunks(chunk_texts)
 
-    for chunk in embedded_chunks:
+    for chunk, embedding in zip(repository_chunks, chunk_embeddings):
         new_chunk = models.Chunk(
-            repository_id = new_repository.id,
-            chunk_index = chunk["chunk_index"],
-            chunk_text = chunk["chunk_text"],
-            chunk_embedding = chunk["embedding"],
-            chunk_metadata = {
-                "chunk_file_path" : chunk["file_path"],
-                "chunk_name" : chunk["Repo_name"],
-                "chunk_owner" : chunk["Repo_owner"],
-                "chunk_index" : chunk["chunk_index"],
+            repository_id=new_repository.id,
+            chunk_index=chunk["chunk_index"],
+            chunk_text=chunk["chunk_text"],
+            chunk_embedding=embedding,
+            chunk_metadata={
+                "chunk_file_path": chunk["file_path"],
+                "chunk_name": chunk["Repo_name"],
+                "chunk_owner": chunk["Repo_owner"],
+                "chunk_index": chunk["chunk_index"],
             }
         )
 
         db.add(new_chunk)
-    db.commit()
 
+    await db.commit()
 
 
     # report queries
@@ -125,49 +126,49 @@ def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depe
 
     repository_summary_relevant_chunks = build_report_query.report_query(
     repo_id,
-    pgvector_queries.REPOSITORY_SUMMARY_QUERY,
+    reports_queries[0],
     db
     )
 
     technology_stack_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.TECHNOLOGY_STACK_QUERY,
+        reports_queries[1],
         db
     )
 
     architecture_flow_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.ARCHITECTURE_FLOW_QUERY,
+        reports_queries[2],
         db
     )
 
     database_flow_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.DATABASE_FLOW_QUERY,
+        reports_queries[4],
         db
     )
 
     architecture_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.ARCHITECTURE_REVIEW_QUERY,
+        reports_queries[3],
         db
     )
 
     code_quality_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.CODE_QUALITY_REVIEW_QUERY,
+        reports_queries[9],
         db
     )
     
     security_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.SECURITY_REVIEW_QUERY,
+        reports_queries[6],
         db
     )
 
     production_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.PRODUCTION_REVIEW_QUERY,
+        reports_queries[7],
         db
     )
 
@@ -175,20 +176,20 @@ def get_repository(repository_url:repository.RequestURL, db: AsyncSession = Depe
 
     database_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.DATABASE_REVIEW_QUERY,
+        reports_queries[5],
         db
     )
 
     documentation_review_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.DOCUMENTATION_REVIEW_QUERY,
+        reports_queries[8],
         db
     )
 
 
     contribution_relevant_chunks = build_report_query.report_query(
         repo_id,
-        pgvector_queries.CONTRIBUTION_QUERY,
+        reports_queries[10],
         db
     )
 
