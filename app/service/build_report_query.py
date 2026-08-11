@@ -3,9 +3,9 @@ from sqlalchemy import select
 from ..db import models
 
 
-def report_query(repo_id: int, embed_query: list, db: AsyncSession):
+async def report_query(repo_id: int, embed_query: list, db: AsyncSession):
 
-    result =  db.execute(
+    result =  await db.execute(
         select(models.Chunk)
         .where(models.Chunk.repository_id == repo_id)
         .order_by(
