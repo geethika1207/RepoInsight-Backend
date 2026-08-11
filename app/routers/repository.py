@@ -9,6 +9,7 @@ from ..service import pgvector_queries, build_report_query, combine_chunks_promp
 from ..service import llm_service
 import subprocess
 from pathlib import Path
+import asyncio
 
 router = APIRouter()
 
@@ -124,75 +125,76 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
 
     repo_id = new_repository.id
 
-    repository_summary_relevant_chunks = build_report_query.report_query(
-    repo_id,
-    reports_queries[0],
-    db
+
+    (
+        repository_summary_relevant_chunks,
+        technology_stack_relevant_chunks,
+        architecture_flow_relevant_chunks,
+        database_flow_relevant_chunks,
+        architecture_review_relevant_chunks,
+        code_quality_review_relevant_chunks,
+        security_review_relevant_chunks,
+        production_review_relevant_chunks,
+        database_review_relevant_chunks,
+        documentation_review_relevant_chunks,
+        contribution_relevant_chunks,
+    ) = await asyncio.gather(
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[0],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[1],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[2],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[4],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[3],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[9],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[6],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[7],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[5],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[8],
+            db
+        ),
+        build_report_query.report_query(
+            repo_id,
+            reports_queries[10],
+            db
+        ),
     )
-
-    technology_stack_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[1],
-        db
-    )
-
-    architecture_flow_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[2],
-        db
-    )
-
-    database_flow_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[4],
-        db
-    )
-
-    architecture_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[3],
-        db
-    )
-
-    code_quality_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[9],
-        db
-    )
-    
-    security_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[6],
-        db
-    )
-
-    production_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[7],
-        db
-    )
-
-
-
-    database_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[5],
-        db
-    )
-
-    documentation_review_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[8],
-        db
-    )
-
-
-    contribution_relevant_chunks = build_report_query.report_query(
-        repo_id,
-        reports_queries[10],
-        db
-    )
-
 
     # combine identical report chunks
 
@@ -241,57 +243,32 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
 
     #llm_report_generation
 
-    summary_technology_stack = llm_service.final_report(summary_technology_stack_llm_prompt)
+    (
+        summary_technology_stack,
+        architecture_flow_database_flow,
+        architecture_review_code_quality_review,
+        production_review_security_review,
+        database_review,
+        documentation_review,
+        contributions_analysis,
+    ) = await asyncio.gather(
+        llm_service.final_report(summary_technology_stack_llm_prompt),
+        llm_service.final_report(architecture_flow_database_flow_llm_prompt),
+        llm_service.final_report(architecture_review_code_quality_review_llm_prompt),
+        llm_service.final_report(production_review_security_review_llm_prompt),
+        llm_service.final_report(database_review_llm_prompt),
+        llm_service.final_report(documentation_review_llm_prompt),
+        llm_service.final_report(contributions_analysis_llm_prompt),
+    )    
 
-    architecture_flow_database_flow = llm_service.final_report(architecture_flow_database_flow_llm_prompt)
-
-    architecture_review_code_quality_review = llm_service.final_report(architecture_review_code_quality_review_llm_prompt)
-
-    production_review_security_review = llm_service.final_report(production_review_security_review_llm_prompt)
-
-    database_review = llm_service.final_report(database_review_llm_prompt)
-
-    documentation_review = llm_service.final_report(documentation_review_llm_prompt)
-
-    contributions_analysis = llm_service.final_report(contributions_analysis_llm_prompt)
-
-    # return {
-    #     "project_overview": summary_technology_stack,
-    #     "architecture_flow_database_flow": architecture_flow_database_flow,
-    #     "architecture_review_code_quality_review": architecture_review_code_quality_review,
-    #     "production_security_review": production_review_security_review,
-    #     "database_review": database_review,
-    #     "documentation_review": documentation_review,
-    #     "contributions_analysis": contributions_analysis,
-    # }
+    return {
+         "project_overview": summary_technology_stack,
+         "architecture_flow_database_flow": architecture_flow_database_flow,
+         "architecture_review_code_quality_review": architecture_review_code_quality_review,
+         "production_security_review": production_review_security_review,
+         "database_review": database_review,
+         "documentation_review": documentation_review,
+         "contributions_analysis": contributions_analysis,
+     }
 
 
-    # report queries
-
-    summary_query = pgvector_queries.REPOSITORY_SUMMARY_QUERY
-    technology_stack_query = pgvector_queries.TECHNOLOGY_STACK_QUERY
-    architecture_flow_query = pgvector_queries.ARCHITECTURE_FLOW_QUERY
-    architecture_review_query = pgvector_queries.ARCHITECTURE_REVIEW_QUERY
-    database_flow_query = pgvector_queries.DATABASE_FLOW_QUERY
-    database_review_query = pgvector_queries.DATABASE_REVIEW_QUERY
-    security_review_query = pgvector_queries.SECURITY_REVIEW_QUERY
-    production_review_query = pgvector_queries.PRODUCTION_REVIEW_QUERY 
-    documentation_review_query = pgvector_queries.DOCUMENTATION_REVIEW_QUERY
-    code_quality_review_query = pgvector_queries.CODE_QUALITY_REVIEW_QUERY
-    contributions_query = pgvector_queries.CONTRIBUTION_QUERY  
-
-    queries = []
-
-    queries.extend([
-        summary_query,
-        technology_stack_query,
-        architecture_flow_query,
-        architecture_review_query,
-        database_flow_query,
-        database_review_query,
-        security_review_query,
-        production_review_query,
-        documentation_review_query,
-        code_quality_review_query,
-        contributions_query
-    ])
