@@ -260,36 +260,25 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
         
     #llm_report_generation
 
-# ---------------------------------------------------------
-    # REPLACE your old llm_report_generation block with this:
-    # ---------------------------------------------------------
-
-    print("Executing Batch 1 (Maxing out the 5 RPM limit)...")
+    print("Executing all 7 LLM requests concurrently via Cohere...")
+    
     (
         summary_technology_stack,
         architecture_flow_database_flow,
         architecture_review_code_quality_review,
         production_review_security_review,
         database_review,
+        documentation_review,
+        contributions_analysis,
     ) = await asyncio.gather(
         llm_service.final_report(summary_technology_stack_llm_prompt),
         llm_service.final_report(architecture_flow_database_flow_llm_prompt),
         llm_service.final_report(architecture_review_code_quality_review_llm_prompt),
         llm_service.final_report(production_review_security_review_llm_prompt),
         llm_service.final_report(database_review_llm_prompt),
-    )
-
-    print("Pausing for 65 seconds to reset Google's quota timer...")
-    await asyncio.sleep(65)
-
-    print("Executing Batch 2 (The final 2 requests)...")
-    (
-        documentation_review,
-        contributions_analysis,
-    ) = await asyncio.gather(
         llm_service.final_report(documentation_review_llm_prompt),
         llm_service.final_report(contributions_analysis_llm_prompt),
-    )    
+    ) 
 
     print("All 7 reports generated successfully!")
 
