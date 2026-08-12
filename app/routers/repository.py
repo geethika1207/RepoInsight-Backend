@@ -280,7 +280,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
         llm_service.final_report(contributions_analysis_llm_prompt),
     ) 
 
-    print("All 7 reports generated successfully!"
+    print("All 7 reports generated successfully!")
 
     return {
          "project_overview": summary_technology_stack,
