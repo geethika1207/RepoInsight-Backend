@@ -2,42 +2,33 @@ import os
 import json
 import re
 import asyncio
-from google import genai
-from google.genai import types
+import cohere
 from dotenv import load_dotenv
+from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 load_dotenv()
 
-# Initialize Google GenAI client
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Initialize Cohere Async Client
+client = cohere.AsyncClient(api_key=os.getenv("COHERE_API_KEY"))
 
-# 1. TEMPORARILY COMMENTED OUT the retry block to stop hiding the real error
-# @retry(
-#     retry=retry_if_exception_type((ServerError, APIError)),
-#     wait=wait_random_exponential(multiplier=2, max=32),
-#     stop=stop_after_attempt(5)
-# )
-async def ask_gemini(prompt: str) -> str:
-    response = await client.aio.models.generate_content(
-        model="gemini-3.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            # 2. ADDED SAFETY SETTINGS: This prevents Google from blocking your 
-            # security reviews when it sees words like "vulnerability" or "exploit"
-            safety_settings=[
-                types.SafetySetting(
-                    category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                    threshold="BLOCK_NONE",
-                )
-            ]
-        ),
+# 1. Define ask_cohere ABOVE final_report with Retry Logic
+# Tenacity will automatically catch any API hiccups (like 503s or temporary 429s) and retry safely
+@retry(
+    wait=wait_random_exponential(multiplier=2, max=32),
+    stop=stop_after_attempt(5)
+)
+async def ask_cohere(prompt: str) -> str:
+    response = await client.chat(
+        model="command-r-08-2024",  # <-- Updated to the strict version name
+        message=prompt,
+        response_format={"type": "json_object"}
     )
     return response.text.strip()
 
-# 2. Define final_report using ask_gemini and re.sub
+
+# 2. Define final_report using ask_cohere and re.sub
 async def final_report(final_llm_prompt: str) -> dict:
-    raw_text = await ask_gemini(final_llm_prompt)
+    raw_text = await ask_cohere(final_llm_prompt)
     
     # Clean markdown blocks if present
     raw_text = raw_text.strip()
