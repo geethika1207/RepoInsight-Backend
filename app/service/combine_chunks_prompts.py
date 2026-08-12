@@ -31,6 +31,7 @@ def summary_technology_stack_prompts(prompt1, prompt2):
     Do not include explanations.
     Do not add extra fields.
     Do not omit any fields.
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
     {{
         "repository_summary" :{{
@@ -55,6 +56,7 @@ def summary_technology_stack_prompts(prompt1, prompt2):
            "testing frameworks" : [...]
         }}
     }}
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
 """
     return PROJECT_OVERVIEW_QUERY
@@ -81,6 +83,7 @@ def architecture_flow_database_flow_prompts(prompt1, prompt2):
     Do not include explanations.
     Do not add extra fields.
     Do not omit any fields.
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
     {{
         "architecture_flow" :{{
@@ -96,6 +99,7 @@ def architecture_flow_database_flow_prompts(prompt1, prompt2):
             "database_summary" : "..."
         }}
     }}
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
 """
     return PROJECT_flow_QUERY
@@ -122,6 +126,7 @@ def architecture_review_code_quality_review_prompts(prompt1, prompt2):
     Do not include explanations.
     Do not add extra fields.
     Do not omit any fields.
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
     {{
         "architecture_review" :{{
@@ -135,6 +140,7 @@ def architecture_review_code_quality_review_prompts(prompt1, prompt2):
             "improvement_suggestions" : [...]
         }}
     }}
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
 """
     return PROJECT_review_QUERY
@@ -161,6 +167,7 @@ def production_review_security_review_prompts(prompt1, prompt2):
     Do not include explanations.
     Do not add extra fields.
     Do not omit any fields.
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
     {{
         "production_review" :{{
@@ -174,6 +181,7 @@ def production_review_security_review_prompts(prompt1, prompt2):
             "improvement_suggestions" : [...]
         }}
     }}
+    You must return your analysis as a SINGLE JSON object containing all requested sections. Do not return multiple JSON objects."
 
 """
     return PROJECT_review_QUERY

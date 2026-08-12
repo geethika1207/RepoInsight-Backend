@@ -10,6 +10,7 @@ from ..service import llm_service
 import subprocess
 from pathlib import Path
 import asyncio
+import tiktoken
 
 router = APIRouter()
 
@@ -240,7 +241,23 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
 
     contributions_analysis_llm_prompt = prompt_preprocessor.final_prompt(contribution_relevant_chunks, contributions_analysis_prompt)
 
+    # Measuring token size
 
+    encoding = tiktoken.get_encoding("cl100k_base")
+
+    for name, prompt in [
+        ("summary_technology_stack", summary_technology_stack_llm_prompt),
+        ("architecture_flow_database_flow", architecture_flow_database_flow_llm_prompt),
+        ("architecture_review_code_quality", architecture_review_code_quality_review_llm_prompt),
+        ("production_security", production_review_security_review_llm_prompt),
+        ("database_review", database_review_llm_prompt),
+        ("documentation_review", documentation_review_llm_prompt),
+        ("contributions", contributions_analysis_llm_prompt),
+    ]:
+        tokens = len(encoding.encode(prompt))
+        print(f"{name}: {tokens} tokens")
+
+        
     #llm_report_generation
 
     (
