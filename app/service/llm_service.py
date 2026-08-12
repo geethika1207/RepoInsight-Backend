@@ -5,8 +5,6 @@ import asyncio
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from tenacity import retry, wait_random_exponential, retry_if_exception_type, stop_after_attempt
-from google.genai.errors import ServerError, APIError
 
 load_dotenv()
 
