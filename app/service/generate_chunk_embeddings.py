@@ -1,7 +1,9 @@
-import os
 import cohere
 
-co = cohere.Client(os.getenv("COHERE_API_KEY"))
+from app.core.config import settings
+
+# Use settings here instead of os.getenv
+co = cohere.Client(settings.COHERE_API_KEY)
 
 def embedding_chunks(queries):
     if isinstance(queries, str):
