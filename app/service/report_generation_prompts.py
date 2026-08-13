@@ -90,40 +90,25 @@ You are generating the Technology Stack Overview section for a GitHub repository
 
 You have already received the most relevant repository files related to the project's technologies.
 
-Your task is to identify every technology that is explicitly supported by the retrieved repository context.
+How to Identify Technologies:
+1. CODE INFERENCE (Languages & Frameworks): You MUST deduce the `programming_language`, `backend_framework`, and `frontend_framework` by analyzing the raw code syntax, file structures, and core imports. 
+   - For example, if you see Python syntax (`def`, `async def`) or Python imports, deduce "Python". 
+   - If you see `from fastapi import FastAPI`, deduce "FastAPI". 
 
-Your goal is to extract technologies that are explicitly mentioned OR clearly evidenced by the retrieved repository context.
-
-A technology is considered evidenced when it appears in:
-- dependency files
-- import statements
-- configuration files
-- deployment files
-- Docker files
-- environment configuration
-- initialization code
-- package managers
-- build configuration
+2. EXPLICIT EVIDENCE (All other categories): For databases, ORMs, vector databases, caches, AI models, and external APIs, extract them ONLY if they are explicitly evidenced in dependency files, imports, or configuration files.
 
 Evidence Rules (MANDATORY) :
-
 - Extract technologies ONLY from the retrieved repository context.
-- Every reported technology must be directly supported by the retrieved files.
-Do NOT guess technologies that are not supported by the retrieved repository context.
-
-However, if a technology is clearly evidenced by imports, dependency files, configuration files, or initialization code, extract it.
-- Do NOT infer technologies based on common project structures.
-- Do NOT assume frameworks, databases, libraries, or tools.
+- Every reported technology must be supported by the retrieved files.
+- For databases, tools, and services, do NOT guess if they are not supported by the context.
 - Do NOT use prior knowledge about similar repositories.
+- CRITICAL: Do NOT copy any technology names mentioned in this prompt's instructions or schema unless they actually exist in the retrieved context.
 
 If a technology cannot be verified from the retrieved repository context, return exactly:
 
 "Not mentioned in the retrieved repository context."
 
-Do not report technologies unless they are directly supported by the retrieved repository context.
-
 Extract the Following Categories :
-
 
 - programming_language
 - backend_framework
@@ -142,11 +127,9 @@ Extract the Following Categories :
 - development_tools
 - testing_frameworks
 
-
 Output Rules :
 
-
-- Return ONLY technology names.
+- Return ONLY exact, specific technology names found in the context (e.g., use the official tool name rather than a generic term like "Database").
 - Do NOT explain technologies.
 - Do NOT describe how they are used.
 - Do NOT write complete sentences.
@@ -158,54 +141,28 @@ Output Rules :
 - Do NOT wrap the response in code fences.
 - The response must begin with "{" and end with "}".
 
-Prefer exact technology names.
-
-Examples:
-
-FastAPI
-PostgreSQL
-SQLAlchemy
-Redis
-PGVector
-React
-Deepgram Streaming API
-Microsoft Edge TTS
-Groq API
-JWT
-Docker
-Render
-
-Avoid generic names such as:
-
-LLM
-Database
-ORM
-Authentication
-Cache
-Cloud
-
-Return ONLY valid JSON matching exactly this schema.
+Return ONLY valid JSON matching exactly this schema. Replace the "..." with the extracted technologies, or the exact string "Not mentioned in the retrieved repository context." if none are found.
 
 {
     "programming_language": "...",
     "backend_framework": "...",
     "frontend_framework": "...",
-    "libraries": [...],
+    "libraries": ["...", "..."],
     "database": "...",
     "orm": "...",
     "vector_database": "...",
-    "ai_llm_models": [...],
+    "ai_llm_models": ["...", "..."],
     "embedding_models": "...",
     "authentication": "...",
     "cache": "...",
     "background_jobs_queue": "...",
     "cloud_deployment": "...",
-    "external_apis_services": [...],
-    "development_tools": [...],
+    "external_apis_services": ["...", "..."],
+    "development_tools": ["...", "..."],
     "testing_frameworks": "..."
 }
-
 """
+
 
 ARCHITECTURE_FLOW_PROMPT = """
 
