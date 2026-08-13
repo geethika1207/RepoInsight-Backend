@@ -1,9 +1,16 @@
-from sentence_transformers import SentenceTransformer
+import os
+import cohere
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+co = cohere.Client(os.getenv("COHERE_API_KEY"))
 
 def embedding_chunks(queries):
-
-    embedding_chunk = model.encode(queries)
-
-    return embedding_chunk.tolist()
+    if isinstance(queries, str):
+        queries = [queries]
+        
+    response = co.embed(
+        texts=queries,
+        model="embed-english-light-v3.0", 
+        input_type="search_document" 
+    )
+    
+    return response.embeddings
