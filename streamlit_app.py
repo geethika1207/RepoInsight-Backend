@@ -1,12 +1,102 @@
 import streamlit as st
 import requests
 
-# Point this to your live Render backend
+# --- HELPER FUNCTION ---
+# This converts the raw dictionary into clean, readable Markdown bullet points
+def json_to_markdown(data, indent_level=0):
+    markdown_text = ""
+    indent = "    " * indent_level  # 4 spaces for proper markdown nesting
+    
+    if isinstance(data, dict):
+        for key, value in data.items():
+            # Clean up keys: "technology_stack" -> "Technology Stack"
+            clean_key = key.replace("_", " ").title()
+            if isinstance(value, (dict, list)):
+                markdown_text += f"{indent}- **{clean_key}**\n"
+                markdown_text += json_to_markdown(value, indent_level + 1)
+            else:
+                markdown_text += f"{indent}- **{clean_key}:** {value}\n"
+    elif isinstance(data, list):
+        for item in data:
+            if isinstance(item, (dict, list)):
+                markdown_text += json_to_markdown(item, indent_level + 1)
+            else:
+                markdown_text += f"{indent}- {item}\n"
+    else:
+        markdown_text += f"{indent}- {data}\n"
+        
+    return markdown_text
+# -----------------------
+
+# 1. Page Configuration
+st.set_page_config(page_title="RepoInsight", page_icon="🔍", layout="wide")
+st.title("🔍 RepoInsight Dashboard")
+st.write("Generate intelligent reports from your codebase.")
+
+# Live Render backend URL
 API_URL = "https://repoinsight-backend-1.onrender.com"
 
-st.title("RepoInsight Dashboard")
+# 2. Sidebar Setup
+with st.sidebar:
+    st.header("Authentication")
+    auth_token = st.text_input("Access Token / JWT", type="password", help="Enter your auth token from login")
+    
+    st.divider()
+    
+    st.header("Configuration")
+    repo_url = st.text_input("GitHub Repository URL", placeholder="https://github.com/user/repo")
+    report_type = st.selectbox("Select Report Type", ["Security Analysis", "Code Quality", "Full Summary"])
+    generate_btn = st.button("Generate Report", type="primary")
 
-# Example of how Streamlit will talk to your backend
-if st.button("Generate Report"):
-    response = requests.post(f"{API_URL}/your-endpoint", json={"query": "test"})
-    st.write(response.json())
+# 3. Handle Action
+if generate_btn:
+    if not auth_token:
+        st.error("Please enter your Access Token in the sidebar first!")
+    elif not repo_url:
+        st.warning("Please enter a repository URL!")
+    else:
+        with st.spinner("Cloning repository, embedding chunks, and generating report... Please wait."):
+            try:
+                # 4. Prepare Headers with Authentication
+                headers = {
+                    "Authorization": f"Bearer {auth_token}"
+                }
+                
+                # 5. Make Call to Backend
+                response = requests.post(
+                    f"{API_URL}/repository_analysis", 
+                    json={
+                        "url": repo_url, 
+                    },
+                    headers=headers,
+                    timeout=180
+                )
+                
+                if response.status_code == 200:
+                    st.success("Report Generated Successfully!")
+                    
+                    report_data = response.json()
+                    
+                    # Dynamically loop through the exact keys your backend returned
+                    for section_key, section_content in report_data.items():
+                        display_title = section_key.replace("_", " ").title()
+                        
+                        # The Dropdown Expander you liked!
+                        with st.expander(f"📁 {display_title}", expanded=True):
+                            
+                            if isinstance(section_content, (dict, list)):
+                                # USE THE HELPER FUNCTION HERE INSTEAD OF st.json()
+                                formatted_markdown = json_to_markdown(section_content)
+                                st.markdown(formatted_markdown)
+                            else:
+                                st.markdown(section_content)
+                                
+                elif response.status_code == 401:
+                    st.error("Unauthorized (401): Invalid or expired access token.")
+                else:
+                    st.error(f"Error {response.status_code}: {response.text}")
+                    
+            except requests.exceptions.Timeout:
+                st.error("The request timed out. The repository processing took longer than expected.")
+            except requests.exceptions.RequestException as e:
+                st.error(f"Failed to connect to the backend: {e}")
