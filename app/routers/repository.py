@@ -32,28 +32,31 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
     BASE_DIR = Path("repositories")
     BASE_DIR.mkdir(exist_ok=True)
 
+    # 1. THIS IS THE MAGIC LINE YOU ARE MISSING!
+    # It must exist before the print statements.
+    destination = BASE_DIR / repo_name
+
+    # 2. Now it is safe to print
     print(f"--> DEBUG URL: '{github_url}'")
     print(f"--> DEBUG DESTINATION: '{destination}'")
 
-    destination = BASE_DIR/repo_name
-
-    try:
-        subprocess.run([
-            "git",
-            "clone",
-            github_url,
-            str(destination)
-        ],
-        check=True
-        )
-
-    except subprocess.CalledProcessError as e:
-        print(f"--> GIT CLONE ERROR: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Unable to clone github repository"
-        )
-
+    # 3. Now it is safe to check if the folder exists
+    if not destination.exists():
+        try:
+            subprocess.run([
+                "git",
+                "clone",
+                github_url,
+                str(destination)
+            ], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"--> GIT CLONE ERROR: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to clone github repository"
+            )
+    else:
+        print(f"Repository {repo_name} already exists. Skipping clone.")
 
     # save to database 
 
