@@ -222,17 +222,13 @@ Start from the user's action.
 
 Then continue following the application's behaviour.
 
-For example:
+For example (DO NOT COPY THIS E-COMMERCE EXAMPLE):
 
-- User starts an interview
-- AI generates questions
-- Speech is synthesized
-- User speaks
-- Speech is transcribed
-- LLM evaluates answers
-- Adaptive difficulty updates
-- Database stores results
-- Report is generated
+- User clicks the checkout button
+- System validates shopping cart inventory
+- External payment gateway processes the transaction
+- Database updates order status to 'Paid'
+- Background worker sends a confirmation email
 
 This is only an example of the TYPE OF FLOW.
 
@@ -331,23 +327,21 @@ Instead, explain HOW THE APPLICATION'S DATA MOVES.
 
 Think from the application's perspective.
 
-Example of the expected style (DO NOT COPY):
+Example of the expected style (DO NOT COPY THIS E-COMMERCE EXAMPLE):
 
-User registers
+User adds an item to their cart.
 ↓
-User information is stored in the Users table.
+Cart data is temporarily stored in the ShoppingCart table.
 ↓
-User starts an interview.
+User completes checkout.
 ↓
-A new record is created in the Interview table.
+A new record is created in the Orders table.
 ↓
-Each answer is stored in the Response table.
+Payment status is updated.
 ↓
-Overall interview analysis is generated.
+Payment details are stored in the Transactions table.
 ↓
-Analysis is stored in the OverallAnalysis table.
-↓
-Interview history retrieves data from Interview, Response, and OverallAnalysis tables.
+Order history retrieves data from the Orders and Transactions tables.
 
 The above is ONLY an example of the style.
 
@@ -494,7 +488,7 @@ Analyze the repository for architectural characteristics such as:
 - Extensibility
 - Maintainability
 - Scalability
-- AI pipeline organization (if present)
+- External service or third-party integration organization (if present)
 - Background job organization (if present)
 - Database abstraction (if present)
 
@@ -510,7 +504,7 @@ Good examples:
 
 - Business logic is separated from API routing.
 - Authentication is isolated into dedicated modules.
-- AI components are organized independently from HTTP endpoints.
+- External service integrations are organized independently from HTTP endpoints.
 - Services are reused across multiple features.
 - Repository follows feature-based organization.
 
@@ -555,7 +549,7 @@ Instead, identify architectural issues such as:
 - Overly large modules
 - Cross-module dependencies
 - Missing abstraction layers
-- AI orchestration mixed with HTTP handling
+- External service orchestration mixed with HTTP handling
 - Scalability bottlenecks caused by architecture
 - Maintainability issues caused by project organization
 
