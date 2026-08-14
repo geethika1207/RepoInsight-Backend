@@ -231,35 +231,25 @@ Avoid generic application code.
 """
 
 DOCUMENTATION_REVIEW_QUERY = """
-Retrieve repository documentation for evaluating documentation quality.
+# Project Overview
+This repository contains the source code and documentation for the application. 
 
-Highest priority:
+## Installation and Setup
+To install and run this project locally, clone the repository and install the dependencies using the requirements file. 
+Set up your environment variables before running the server.
 
-- README.md
+## Usage
+Here are the instructions on how to use the application. 
 
-Then retrieve:
+## Features
+- Core application logic
+- API endpoints
+- Database integration
 
-- docs/
-- CONTRIBUTING.md
-- INSTALL.md
-- SETUP.md
-- API documentation
-- architecture documentation
-- deployment documentation
-
-Retrieve documentation describing:
-
-- project overview
-- installation
-- setup
-- usage
-- configuration
-- API usage
-- contribution process
-- project structure
-
-Avoid retrieving implementation code unless documentation references it directly.
+## Contributing
+Please read the contribution guidelines before submitting a pull request.
 """
+
 
 CODE_QUALITY_REVIEW_QUERY = """
 Retrieve representative source code from across the repository for evaluating overall code quality.
