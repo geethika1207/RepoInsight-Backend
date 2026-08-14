@@ -22,44 +22,33 @@ The goal is to retrieve enough context to understand the project without reading
 """
 
 TECHNOLOGY_STACK_QUERY = """
-Retrieve repository files that explicitly declare technologies used by the project.
+# Technology Stack and Dependencies
 
-Highest priority:
+## Built With / Technical Overview
+This project is built using the following core technologies, frameworks, and libraries:
 
-- requirements.txt
-- pyproject.toml
-- package.json
-- poetry.lock
-- Pipfile
-- Dockerfile
-- docker-compose.yml
-- render.yaml
-- vercel.json
-- README.md
-- environment configuration
-- import statements
-- initialization files
+| Category | Specification |
+|---|---|
+| Programming Language | Core language used for development |
+| Backend Framework | Primary server and API framework |
+| Frontend Framework | User interface and client framework |
+| Database | Main relational or NoSQL data storage |
+| Vector Database | Semantic search and embedding storage |
+| ORM | Object-relational mapping library |
+| AI Models | Large language models and APIs |
+| Embedding Model | Text vectorization model |
+| Authentication | Security, JWT, and user login handling |
+| Deployment | Cloud hosting and containerization platform |
 
-Retrieve evidence for:
+<!-- Badges and Shields -->
+![Language](https://img.shields.io/badge/language-blue)
+![Framework](https://img.shields.io/badge/framework-green)
+![Database](https://img.shields.io/badge/database-purple)
 
-- programming language
-- frameworks
-- libraries
-- databases
-- ORMs
-- authentication
-- cache
-- queues
-- AI models
-- embedding models
-- vector databases
-- deployment platforms
-- external APIs
-- development tools
-- testing frameworks
-
-Only retrieve files that directly prove the technology exists.
+## Dependencies (requirements.txt / package.json / pyproject.toml / Dockerfile)
+List of imported libraries, caching layers, job queues, external APIs, and testing frameworks required to run the application environment.
 """
+
 
 ARCHITECTURE_FLOW_QUERY = """
 Retrieve the repository files required to reconstruct the application's actual execution flow.
