@@ -234,6 +234,21 @@ DOCUMENTATION_REVIEW_QUERY = """
 # Project Overview
 This repository contains the source code and documentation for the application. 
 
+## Tech Stack / Built With / Technical Overview
+Here are the frameworks, libraries, databases, and programming languages used to build this project. 
+
+| Category | Technology/Specification |
+|---|---|
+| Frontend | |
+| Backend | |
+| Database | |
+| Infrastructure | |
+
+* **Language:**
+* **Framework:**
+* **Database:**
+![Badge](https://img.shields.io/)
+
 ## Installation and Setup
 To install and run this project locally, clone the repository and install the dependencies using the requirements file. 
 Set up your environment variables before running the server.
@@ -249,7 +264,6 @@ Here are the instructions on how to use the application.
 ## Contributing
 Please read the contribution guidelines before submitting a pull request.
 """
-
 
 CODE_QUALITY_REVIEW_QUERY = """
 Retrieve representative source code from across the repository for evaluating overall code quality.
