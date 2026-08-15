@@ -11,7 +11,7 @@ async def report_query(repo_id: int, embed_query: list, db: AsyncSession):
         .order_by(
             models.Chunk.chunk_embedding.cosine_distance(embed_query)
         )
-        .limit(8)
+        .limit(10)
     )
 
     chunks = result.scalars().all()
