@@ -15,10 +15,9 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
         # 3. Build the HNSW Index
-        # IMPORTANT: Replace 'your_table_name' and 'your_vector_column' below!
         hnsw_query = text("""
-            CREATE INDEX IF NOT EXISTS repo_chunks_hnsw_idx 
-            ON your_table_name USING hnsw (your_vector_column vector_cosine_ops) 
+            CREATE INDEX IF NOT EXISTS chunks_hnsw_idx 
+            ON "Chunks" USING hnsw (chunk_embedding vector_cosine_ops) 
             WITH (m = 16, ef_construction = 64);
         """)
         await conn.execute(hnsw_query)
