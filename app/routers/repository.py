@@ -81,7 +81,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
     chunk_embeddings = generate_chunk_embeddings.embedding_chunks(chunk_texts)
 
     for chunk, embedding in zip(repository_chunks, chunk_embeddings):
-        new_chunk = models.Chunk(
+        new_chunk = models.FileChunk(
             repository_id=new_repository.id,
             chunk_index=chunk["chunk_index"],
             chunk_text=chunk["chunk_text"],
