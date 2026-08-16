@@ -74,17 +74,6 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
 
     repository_files = extract_repo_files.read_repository(destination)
 
-    for file in repository_files:
-        repo_files = models.RepositoryFile(
-            file_path = file["file_path"],
-            fire_content = file["content"]
-        )
-
-        db.add(repo_files)
-    await db.commit()
-
-    
-
     repository_chunks = create_repo_chunks.chunk_repository(repository_files, 1000, 200, repo_name, repo_owner)
 
     chunk_texts = [chunk["chunk_text"] for chunk in repository_chunks]
@@ -97,6 +86,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             chunk_index=chunk["chunk_index"],
             chunk_text=chunk["chunk_text"],
             chunk_embedding=embedding,
+            repository_file_id=chunk["repository_file_id"],
             chunk_metadata={
                 "chunk_file_path": chunk["file_path"],
                 "chunk_name": chunk["Repo_name"],

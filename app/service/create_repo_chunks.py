@@ -10,6 +10,7 @@ def chunk_repository(repo_files, chunk_size:int, overlap:int, Repo_name : str, R
 
         file_path = file["file_path"]
         content = file["content"]
+        repo_file_id = file["repo_files_id"]
 
         while start < len(content):
 
@@ -22,6 +23,7 @@ def chunk_repository(repo_files, chunk_size:int, overlap:int, Repo_name : str, R
                 "Repo_owner" : Repo_owner,
                 "chunk_index" : chunk_index,
                 "chunk_text" : chunk_text,
+                "repository_file_id" : repo_file_id
             })
 
             chunk_index += 1
