@@ -9,7 +9,7 @@ async def report_query(repo_id: int, embed_query, db: AsyncSession):
         select(models.FileChunk)
         .where(models.FileChunk.repository_id == repo_id)
         .order_by(
-            models.FileChunk.chunk_embedding.cosine_distance(embed_query) # Fixed typo here!
+            models.FileChunk.chunk_embedding.cosine_distance(embed_query) 
         )
         .limit(10)
     )
