@@ -1,3 +1,6 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..db import models
+
 SUPPORTED_EXTENSIONS = {
     ".py", ".md", ".txt", ".json", ".yaml", ".yml",
     ".toml", ".ini", ".js", ".ts", ".jsx", ".tsx",
@@ -5,12 +8,10 @@ SUPPORTED_EXTENSIONS = {
     ".php", ".html", ".css", ".sql"
 }
 
-def read_repository(repo_path):
-
+async def read_repository(repo_path, db: AsyncSession):
     repository_files = []
 
     for file in repo_path.rglob("*"):
-
         if not file.is_file():
             continue
 
@@ -18,21 +19,37 @@ def read_repository(repo_path):
             continue
 
         try:
-            #read_text() accepts keyword arguments, not a dictionary
-            content = file.read_text(    
-                encoding = "utf-8",
-                errors = "ignore"                              # Path.read_text() accepts errors, not error
+            content = file.read_text(
+                encoding="utf-8",
+                errors="ignore" 
             )
 
             if "\x00" in content:
                 continue 
 
+            repo_file = models.RepositoryFile(
+                file_path=str(file.relative_to(repo_path)),
+                file_content=content  
+            )
+
+            db.add(repo_file)
+            await db.flush() 
+
+        #This sends the actual SQL INSERT command to your PostgreSQL database. Because the database receives the data, it instantly generates the primary key (id) for that row. However, the save is not permanent yet. It is sitting in a pending transaction.
+
+            # 3. Access the ID using dot notation on the SQLAlchemy object
             repository_files.append({
-                "file_path" : str(file.relative_to(repo_path)),
-                "content" : content
+                "file_path": repo_file.file_path,
+                "content": content,
+                "repo_files_id": repo_file.id 
             })
 
         except Exception:
             continue
 
-    return repository_files   
+    # 4. Commiting  the entire batch in ONE transaction at the very end
+    await db.commit()
+
+    #This tells PostgreSQL to permanently save all the flushed transactions to the hard drive.
+
+    return repository_files
