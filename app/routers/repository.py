@@ -72,7 +72,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
     await db.refresh(new_repository)
 
 
-    repository_files = extract_repo_files.read_repository(destination)
+    repository_files = await extract_repo_files.read_repository(destination, db)
 
     repository_chunks = create_repo_chunks.chunk_repository(repository_files, 500, 200, repo_name, repo_owner)
 
