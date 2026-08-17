@@ -158,6 +158,8 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             build_report_query.report_query(repo_id, reports_queries[10], db),
         )
 
+        print({"Architecture" : architecture_flow_relevant_chunks, "Database" : database_flow_relevant_chunks})
+
         # combine identical report chunks
         summary_technology_stack_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(repository_summary_relevant_chunks , technology_stack_relevant_chunks)
         architecture_flow_database_flow_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(architecture_flow_relevant_chunks , database_flow_relevant_chunks)
