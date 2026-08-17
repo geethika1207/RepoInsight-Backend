@@ -71,6 +71,8 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
     await db.commit()
     await db.refresh(new_repository)
 
+    print("Repo Name: ", new_repository.repo_name)
+
 
     repository_files = await extract_repo_files.read_repository(destination, db)
 

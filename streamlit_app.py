@@ -63,7 +63,7 @@ if generate_btn:
     elif not repo_url:
         st.warning("Please enter a repository URL!")
     else:
-        with st.spinner("Cloning repository, embedding chunks, and generating report...\n\n⏳ *This process typically takes up to 1m 50s with a stable internet connection. Please wait...*"):
+        with st.spinner("Cloning repository, embedding chunks, and generating report...\n\n⏳ *This process typically takes up to 1m 15s with a stable internet connection. Please wait...*"):
             try:
                 # 4. Prepare Headers with Authentication
                 headers = {
