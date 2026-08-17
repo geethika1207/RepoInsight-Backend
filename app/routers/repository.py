@@ -158,7 +158,25 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             build_report_query.report_query(repo_id, reports_queries[10], db),
         )
 
-        print({"Architecture" : architecture_flow_relevant_chunks, "Database" : database_flow_relevant_chunks})
+
+        # FOR DEBUGGING
+
+        print("\n\n🚨🚨🚨 DEBUGGING RETRIEVED CHUNKS 🚨🚨🚨")
+        
+        print("\n--- 1. ARCHITECTURE FLOW CHUNKS ---")
+        print(architecture_flow_relevant_chunks)
+        
+        print("\n--- 2. DATABASE FLOW CHUNKS ---")
+        print(database_flow_relevant_chunks)
+        
+        print("\n--- 3. DATABASE REVIEW CHUNKS ---")
+        print(database_review_relevant_chunks)
+        
+        print("\n--- 4. DOCUMENTATION REVIEW CHUNKS ---")
+        print(documentation_review_relevant_chunks)
+        
+        print("RETRIEVING CHUNKS ARE COMPLETED")
+
 
         # combine identical report chunks
         summary_technology_stack_relevant_chunks = combine_chunks_prompts.combine_retrieval_chunks(repository_summary_relevant_chunks , technology_stack_relevant_chunks)
