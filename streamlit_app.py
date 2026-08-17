@@ -33,6 +33,14 @@ st.set_page_config(page_title="RepoInsight", page_icon="🔍", layout="wide")
 st.title("🔍 RepoInsight Dashboard")
 st.write("Generate intelligent reports from your codebase.")
 
+# Set user expectations right on the dashboard!
+st.info(
+    "👋 **Welcome to RepoInsight!** \n\n"
+    "To guarantee the highest quality AI analysis, our engine is currently optimized "
+    "for **small to medium-sized repositories** (up to ~350,000 characters). "
+    "Support for massive codebases is coming soon!"
+)
+
 # Live Render backend URL
 API_URL = "https://repoinsight-backend-1.onrender.com"
 
@@ -73,7 +81,7 @@ if generate_btn:
                 )
                 
                 if response.status_code == 200:
-                    st.success("Report Generated Successfully!")
+                    st.success("✅ Report Generated Successfully!")
                     
                     report_data = response.json()
                     
@@ -91,10 +99,24 @@ if generate_btn:
                             else:
                                 st.markdown(section_content)
                                 
+                elif response.status_code == 413:
+                    # Safely extract the exact custom message from the backend JSON
+                    try:
+                        error_detail = response.json().get("detail", "Repository is too large.")
+                    except ValueError:
+                        error_detail = "The repository exceeded the maximum allowed size."
+                    
+                    # Display a friendly UI instead of a harsh red error
+                    st.warning("🧱 **Repository Size Limit Exceeded**", icon="⚠️")
+                    st.info(f"**Backend Message:** {error_detail}", icon="ℹ️")
+                    st.markdown(
+                        "*💡 **Tip:** Try running RepoInsight on a smaller microservice or a specific module rather than a massive monorepo!*"
+                    )
+                    
                 elif response.status_code == 401:
-                    st.error("Unauthorized (401): Invalid or expired access token.")
+                    st.error("🔒 Unauthorized (401): Invalid or expired access token.")
                 else:
-                    st.error(f"Error {response.status_code}: {response.text}")
+                    st.error(f"🚨 Error {response.status_code}: {response.text}")
                     
             except requests.exceptions.Timeout:
                 st.error("The request timed out. The repository processing took longer than expected.")
