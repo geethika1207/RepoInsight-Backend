@@ -35,11 +35,15 @@ async def read_repository(repo_path, db: AsyncSession):
             # Check if this file pushes the extraction over the character limit
             total_character_count += len(content)
             if total_character_count > MAX_TOTAL_CHARACTERS:
+                
                 raise HTTPException(
                     status_code=413, 
-                    detail=f"Repository is too large for the AI context window. The limit is {MAX_TOTAL_CHARACTERS} characters."
+                    detail=(
+                        f"Repository is too large for the AI context window. "
+                        f"The limit is {MAX_TOTAL_CHARACTERS} characters, but your repository "
+                        f"has reached {total_character_count} characters."
+                    )
                 )
-
             repo_file = models.RepositoryFile(
                 file_path=str(file.relative_to(repo_path)),
                 file_content=content  
