@@ -218,11 +218,6 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             print(f"{name}: {tokens} tokens")
 
             
-        print("\n\n================ DEBUG PROMPT SENT TO LLM ================")
-        print(architecture_flow_database_flow_llm_prompt)
-        print("==========================================================\n\n")
-        # =========================================================
-
         #llm_report_generation
         print("Executing all 7 LLM requests concurrently via Cohere...")
         
