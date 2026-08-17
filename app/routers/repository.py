@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 import asyncio
 import tiktoken
-import shutil  # <-- 1. IMPORT SHUTIL HERE
+import shutil  # <-- Imported for folder cleanup
 
 router = APIRouter()
 
@@ -55,7 +55,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
     else:
         print(f"Repository {repo_name} already exists. Skipping clone.")
 
-    # 2. WRAP EVERYTHING ELSE IN A TRY...FINALLY BLOCK
+    # Wrap the core logic in try...finally for safe cleanup
     try:
         # save to database 
         new_repository = models.Repository(
@@ -97,6 +97,7 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             db.add(new_chunk)
 
         await db.commit()
+
 
         # report queries
         summary_query = pgvector_queries.REPOSITORY_SUMMARY_QUERY
@@ -195,7 +196,13 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
         ]:
             tokens = len(encoding.encode(prompt))
             print(f"{name}: {tokens} tokens")
+
             
+        print("\n\n================ DEBUG PROMPT SENT TO LLM ================")
+        print(architecture_flow_database_flow_llm_prompt)
+        print("==========================================================\n\n")
+        # =========================================================
+
         #llm_report_generation
         print("Executing all 7 LLM requests concurrently via Cohere...")
         
@@ -241,10 +248,10 @@ async def get_repository(repository_url:repository.RequestURL, db: AsyncSession 
             "database_review": database_review,
             "documentation_review": documentation_review,
             "contributions_analysis": contributions_analysis,
-        }
+        } 
 
     finally:
-        # 3. THIS ALWAYS RUNS: Clean up the cloned folder!
+        # This always executes to clean up the cloned repository folder
         print(f"Cleaning up repository folder: {destination}")
         if destination.exists():
             shutil.rmtree(destination, ignore_errors=True)
