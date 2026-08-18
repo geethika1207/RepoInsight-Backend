@@ -181,60 +181,32 @@ IMPORTANT
 This report is NOT an HTTP request lifecycle.
 
 Do NOT generate generic backend flows such as:
-
-FastAPI
-↓
-Router
-↓
-Service
-↓
-Database
-↓
-Response
-
+FastAPI -> Router -> Service -> Database -> Response
 unless that is literally the application's primary workflow.
 
 Instead, reconstruct the application's BUSINESS WORKFLOW.
-
 Describe what the application is actually doing.
 
 ----------------------------------------
-Evidence Rules
+Evidence Rules & Escape Hatch
 ----------------------------------------
 
 Every step must be supported by the retrieved repository context.
-
 Never invent components.
-
 Never assume framework behaviour.
-
 Never use generic backend execution flow.
-
 Only mention components that are actually present.
+
+*** ESCAPE HATCH ***
+If the retrieved context does not contain enough information to build a coherent business workflow, you MUST return exactly this array: ["No architecture flow could be determined from the retrieved context."] and write a summary stating the same. Do NOT invent a workflow.
 
 ----------------------------------------
 How to Build the Flow
 ----------------------------------------
 
 Follow the application's real execution.
-
-Start from the user's action.
-
-Then continue following the application's behaviour.
-
-For example (DO NOT COPY THIS E-COMMERCE EXAMPLE):
-
-- User clicks the checkout button
-- System validates shopping cart inventory
-- External payment gateway processes the transaction
-- Database updates order status to 'Paid'
-- Background worker sends a confirmation email
-
-This is only an example of the TYPE OF FLOW.
-
-Do NOT copy this example.
-
-Instead reconstruct the repository's own workflow.
+Start from the user's action or system trigger.
+Then continue following the application's behaviour stage by stage.
 
 ----------------------------------------
 Flow Requirements
@@ -243,22 +215,19 @@ Flow Requirements
 Every item should describe ONE meaningful application stage.
 
 Focus on:
-
-- User interactions
-- AI workflow
-- Business logic
-- External APIs
-- Database persistence
+- User interactions or Trigger events
+- AI workflows or specific pipelines
+- Business logic processing
+- External APIs and Services
+- Database persistence events
 - Background processing
 - Result generation
 
 Avoid framework plumbing.
-
 Do NOT simply list routers, services or middleware.
+Explain WHY each stage exists in the application and what it technically accomplishes.
 
-Explain WHY each stage exists in the application.
-
-Each step should be 1-2 concise sentences.
+Each step MUST be a highly detailed explanation of 3 to 5 sentences detailing the technical mechanics of what the application is doing at that stage.
 
 Return the flow as an ordered array.
 
@@ -266,16 +235,11 @@ Return the flow as an ordered array.
 Architecture Summary
 ----------------------------------------
 
-Write a 3-5 sentence summary describing how the complete application works from beginning to end.
-
+Write a detailed 4-6 sentence summary describing how the complete application works from beginning to end.
 Summarize the application's business workflow.
-
 Do NOT summarize the framework structure.
-
 Do NOT review the architecture.
-
 Do NOT suggest improvements.
-
 Do NOT discuss security, production readiness or code quality.
 
 ----------------------------------------
@@ -294,6 +258,7 @@ Return ONLY valid JSON.
 }
 
 """
+
 
 DATABASE_FLOW_PROMPT = """
 
@@ -314,7 +279,6 @@ IMPORTANT
 This is NOT a database technology explanation.
 
 Do NOT explain:
-
 - SQLAlchemy
 - ORM concepts
 - PostgreSQL
@@ -324,48 +288,19 @@ Do NOT explain:
 - How ORMs work
 
 Instead, explain HOW THE APPLICATION'S DATA MOVES.
-
 Think from the application's perspective.
 
-Example of the expected style (DO NOT COPY THIS E-COMMERCE EXAMPLE):
-
-User adds an item to their cart.
-↓
-Cart data is temporarily stored in the ShoppingCart table.
-↓
-User completes checkout.
-↓
-A new record is created in the Orders table.
-↓
-Payment status is updated.
-↓
-Payment details are stored in the Transactions table.
-↓
-Order history retrieves data from the Orders and Transactions tables.
-
-The above is ONLY an example of the style.
-
-Do NOT copy it.
-
-Reconstruct the repository's own data flow.
-
 ------------------------------------------------
-Evidence Rules
+Evidence Rules & Escape Hatch
 ------------------------------------------------
 
 Every step must be directly supported by the retrieved repository context.
-
-Never invent:
-
-- tables
-- entities
-- collections
-- relationships
-- workflows
-
+Never invent tables, entities, collections, relationships, or workflows.
 Never assume database behavior.
+Only describe tables, models, and operations that actually exist in the retrieved context.
 
-Only describe tables and operations that actually exist.
+*** ESCAPE HATCH ***
+If the retrieved context does not contain explicit database schemas, models, or specific database operations, you MUST return exactly this array: ["No database flow could be determined from the retrieved context."] and write a summary stating the same. Do NOT invent tables or data flows.
 
 ------------------------------------------------
 Flow Requirements
@@ -374,32 +309,19 @@ Flow Requirements
 Follow the application's DATA LIFECYCLE.
 
 Describe:
-
-- what user action causes data creation
-- which table/entity stores the data
-- when data is updated
-- when data is retrieved
-- which table is involved
+- what user action or system event causes data creation
+- which specific table/entity stores the data
+- when and how data is updated
+- when and how data is retrieved
+- which specific tables are involved in complex queries
 - how later stages reuse previously stored data
 
 Focus on the BUSINESS DATA FLOW.
+Avoid describing generic SQLAlchemy or ORM implementations.
 
-Avoid describing SQLAlchemy or ORM implementation.
-
-Each step should describe ONE meaningful database event.
-
-Each step should be 1–2 concise sentences.
-
-Whenever possible, explicitly mention the table/entity name involved.
-
-Example style:
-
-User logs in.
-User information is retrieved from the Users table.
-
-NOT:
-
-SQLAlchemy queries the database.
+Each step MUST describe ONE meaningful database event.
+Each step MUST be a highly detailed explanation of 3 to 5 sentences detailing the technical mechanics of the data movement.
+Whenever possible, explicitly mention the exact table/entity name involved.
 
 Return the flow as an ordered array.
 
@@ -407,25 +329,17 @@ Return the flow as an ordered array.
 Database Summary
 ------------------------------------------------
 
-Write a concise summary (3–5 sentences).
+Write a highly detailed summary of 4–6 sentences.
 
 Summarize:
-
 - how the application's data is organized
-- how the tables/entities interact
+- how the main tables/entities interact
 - how data moves throughout the application's execution
 
 Do NOT explain ORM implementation.
-
 Do NOT review the database.
-
 Do NOT suggest improvements.
-
-Do NOT discuss architecture.
-
-Do NOT discuss APIs.
-
-Do NOT discuss security.
+Do NOT discuss architecture, APIs, or security.
 
 ------------------------------------------------
 Output
@@ -443,6 +357,7 @@ Return ONLY valid JSON.
 }
 
 """
+
 
 ARCHITECTURE_REVIEW_PROMPT = """
 
