@@ -68,19 +68,28 @@ with st.sidebar:
                 submit_login = st.form_submit_button("Log In")
                 
                 if submit_login:
-                    with st.spinner("Logging in..."):
-                        # OAuth2PasswordRequestForm expects 'username' and 'password' as form data
-                        login_res = requests.post(
-                            f"{API_URL}/login", 
-                            data={"username": email, "password": password}
-                        )
-                        if login_res.status_code in [200, 201]:
-                            # Save the token to session state
-                            st.session_state.auth_token = login_res.json().get("access_token")
-                            st.success("Logged in successfully!")
-                            st.rerun() # Refresh the UI to hide the login form
-                        else:
-                            st.error(f"Login failed: {login_res.json().get('detail', 'Invalid credentials')}")
+                    # FRONTEND VALIDATION: Check for empty fields
+                    if not email or not password:
+                        st.error("⚠️ Please enter both your email and password.")
+                    else:
+                        with st.spinner("Logging in..."):
+                            # OAuth2PasswordRequestForm expects 'username' and 'password' as form data
+                            login_res = requests.post(
+                                f"{API_URL}/login", 
+                                data={"username": email, "password": password}
+                            )
+                            if login_res.status_code in [200, 201]:
+                                # Save the token to session state
+                                st.session_state.auth_token = login_res.json().get("access_token")
+                                st.success("Logged in successfully!")
+                                st.rerun() # Refresh the UI to hide the login form
+                            else:
+                                # CLEAN ERROR HANDLING: Catch Pydantic 422 lists safely
+                                error_detail = login_res.json().get("detail", "Invalid credentials")
+                                if isinstance(error_detail, list):
+                                    st.error("⚠️ Please ensure all fields are filled out correctly.")
+                                else:
+                                    st.error(f"Login failed: {error_detail}")
                             
         elif auth_mode == "Register":
             with st.form("register_form"):
@@ -89,16 +98,27 @@ with st.sidebar:
                 submit_register = st.form_submit_button("Register")
                 
                 if submit_register:
-                    with st.spinner("Creating account..."):
-                        # Registration expects standard JSON
-                        reg_res = requests.post(
-                            f"{API_URL}/user", 
-                            json={"email": reg_email, "password": reg_password}
-                        )
-                        if reg_res.status_code == 201:
-                            st.success("✅ Account created! Please select 'Log In' above to authenticate.")
-                        else:
-                            st.error(f"Registration failed: {reg_res.json().get('detail', 'Error')}")
+                    # FRONTEND VALIDATION: Prevent empty strings and short passwords
+                    if not reg_email or not reg_password:
+                        st.error("⚠️ Please enter both an email and a password.")
+                    elif len(reg_password) < 4:
+                        st.warning("⚠️ Password must be at least 4 characters long.")
+                    else:
+                        with st.spinner("Creating account..."):
+                            # Registration expects standard JSON
+                            reg_res = requests.post(
+                                f"{API_URL}/user", 
+                                json={"email": reg_email, "password": reg_password}
+                            )
+                            if reg_res.status_code == 201:
+                                st.success("✅ Account created! Please select 'Log In' above to authenticate.")
+                            else:
+                                # CLEAN ERROR HANDLING
+                                error_detail = reg_res.json().get("detail", "Error creating account")
+                                if isinstance(error_detail, list):
+                                    st.error("⚠️ Invalid email format or missing fields.")
+                                else:
+                                    st.error(f"Registration failed: {error_detail}")
                             
         elif auth_mode == "Manual Token":
             manual_token = st.text_input("Access Token / JWT", type="password")
