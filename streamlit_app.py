@@ -147,7 +147,7 @@ if generate_btn:
     else:
         with st.spinner(
             "Cloning repository, embedding chunks, and generating report...\n\n"
-            "⏳ *Most reports finish in under 45 seconds, but repositories near the size limit may take up to a maximum of 1m 15s. Please wait...*"
+            "⏳ *Most reports finish faster , but repositories near the size limit may take up to a maximum of 1m 50s. Please wait...*"
         ):
             try:
                 headers = {
