@@ -54,43 +54,33 @@ ARCHITECTURE_FLOW_QUERY = """
 Retrieve the repository files required to reconstruct the application's actual execution flow.
 
 Prioritize files that contain the application's runtime flow, including:
-
 - application entry point
 - startup logic
-- routers
-- endpoints
-- controllers
-- services
-- business logic
-- middleware
-- dependency injection
-- authentication flow
-- AI pipeline
-- database interactions
-- cache usage
-- background workers
-- utilities invoked during request execution
+- routers and API endpoints
+- controllers and services
+- core business logic and workflows
+- middleware and dependency injection
+- authentication and authorization flow
+- database interactions and data pipelines
+- background workers and asynchronous tasks
 
 Retrieve enough connected code so the complete execution path can be reconstructed from the first incoming request until the final response.
 
 Avoid retrieving isolated utility files that are never used during execution.
 """
 
+
 ARCHITECTURE_REVIEW_QUERY = """
 Retrieve repository content that best represents the overall software architecture.
 
 Prioritize:
-
-- folder structure
-- module organization
-- routers
-- services
-- controllers
-- dependency injection
-- middleware
-- project layout
+- folder structure and project layout
+- module and feature organization
+- separation of concerns
+- routers, services, and controllers
+- dependency injection and middleware
 - architectural patterns
-- reusable modules
+- reusable modules and abstractions
 - business logic organization
 
 Retrieve enough evidence to evaluate architectural decisions rather than individual functions.
@@ -98,71 +88,48 @@ Retrieve enough evidence to evaluate architectural decisions rather than individ
 Avoid retrieving unrelated utility implementations unless they illustrate architectural organization.
 """
 
+
 DATABASE_FLOW_QUERY = """
 Retrieve repository files that describe how application data moves through the database during execution.
 
 Prioritize:
-
-- ORM models
+- ORM models and entity classes
 - schema definitions
-- repositories
-- CRUD services
-- interview creation flow
-- user creation flow
-- response storage
-- analysis generation
-- history retrieval
-- update operations
+- repositories and data access layers
+- CRUD services and state management
+- core business entity creation workflows
+- data update and deletion operations
+- data retrieval and reporting logic
 
 Retrieve the complete lifecycle of data:
+creation -> storage -> updates -> retrieval -> final usage.
 
-creation
-↓
-
-storage
-
-↓
-
-updates
-
-↓
-
-retrieval
-
-↓
-
-final usage
-
-The goal is to reconstruct the application's database workflow rather than explaining ORM usage.
+The goal is to reconstruct the application's business data workflow rather than explaining ORM usage.
 """
+
 
 DATABASE_REVIEW_QUERY = """
 Retrieve repository content required to evaluate the database implementation.
 
 Prioritize:
-
-- ORM models
-- database schema
-- relationships
-- repositories
+- ORM models and entity definitions
+- database schema and migrations
+- relationships (One-to-Many, Many-to-Many)
+- repositories and data access logic
 - CRUD implementations
-- migrations
-- query implementations
+- complex query implementations
 - transaction handling
-- indexes
-- constraints
+- indexes and constraints
 
 Retrieve enough evidence to review:
-
-- schema organization
-- data modeling
-- entity relationships
-- maintainability
-- consistency
-- database design quality
+- schema organization and data modeling
+- entity relationships and consistency
+- maintainability and database design quality
+- separation of the persistence layer from business logic
 
 Avoid retrieving unrelated application logic.
 """
+
 
 SECURITY_REVIEW_QUERY = """
 Retrieve repository content related to implemented security mechanisms.
@@ -220,67 +187,26 @@ Avoid generic application code.
 """
 
 DOCUMENTATION_REVIEW_QUERY = """
-# Project Overview
-This repository contains the source code and documentation for the application. 
+Retrieve the project's documentation files and configuration guides required to understand, install, and run the application.
 
-## Tech Stack / Built With / Technical Overview
-Here are the frameworks, libraries, databases, and programming languages used to build this project. 
+Prioritize finding:
+- README.md and high-level project overviews
+- Installation, setup, and deployment instructions
+- Technology stack and requirements definitions
+- API documentation and usage guides
+- Environment variable configurations
+- Contribution guidelines
+- System architecture explanations
 
-| Category | Technology/Specification |
-|---|---|
-| Frontend | |
-| Backend | |
-| Database | |
-| Infrastructure | |
+Retrieve evidence that explains:
+- What the project does
+- How to start the application locally
+- How the project is structured
+- How a new developer should interact with the codebase
 
-* **Language:**
-* **Framework:**
-* **Database:**
-![Badge](https://img.shields.io/)
-
-## Installation and Setup
-To install and run this project locally, clone the repository and install the dependencies using the requirements file. 
-Set up your environment variables before running the server.
-
-## Usage
-Here are the instructions on how to use the application. 
-
-## Features
-- Core application logic
-- API endpoints
-- Database integration
-
-## Contributing
-Please read the contribution guidelines before submitting a pull request.
+Avoid retrieving backend source code unless it contains massive docstrings explaining the overall project setup.
 """
 
-CODE_QUALITY_REVIEW_QUERY = """
-Retrieve representative source code from across the repository for evaluating overall code quality.
-
-Prioritize code that represents:
-
-- routers
-- services
-- business logic
-- models
-- utilities
-- authentication
-- database access
-- AI modules
-
-Retrieve enough code to evaluate:
-
-- organization
-- consistency
-- naming
-- modularity
-- duplication
-- maintainability
-- complexity
-- reuse
-
-The retrieved code should represent the repository as a whole rather than isolated files.
-"""
 
 CONTRIBUTION_QUERY = """
 Retrieve repository content that reveals realistic contribution opportunities.
