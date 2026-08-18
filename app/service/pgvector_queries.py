@@ -196,13 +196,16 @@ Prioritize finding:
 - API documentation and usage guides
 - Environment variable configurations
 - Contribution guidelines
-- System architecture explanations
+- Markdown tables summarizing project features, endpoints, or dependencies
+- Project badges and shields (e.g., build status, tech stack, versions)
 
 Retrieve evidence that explains:
 - What the project does
 - How to start the application locally
 - How the project is structured
 - How a new developer should interact with the codebase
+
+If standard text explanations are sparse or unavailable, explicitly retrieve markdown tables and badge links that visually convey the project's technology stack and status.
 
 Avoid retrieving backend source code unless it contains massive docstrings explaining the overall project setup.
 """
