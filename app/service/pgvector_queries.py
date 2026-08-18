@@ -51,24 +51,19 @@ List of imported libraries, caching layers, job queues, external APIs, and testi
 
 
 ARCHITECTURE_FLOW_QUERY = """
-Retrieve the repository files required to reconstruct the application's actual execution flow.
+Retrieve the actual executable source code that defines the application's runtime flow.
 
-Prioritize files that contain the application's runtime flow, including:
-- application entry point
-- startup logic
-- routers and API endpoints
-- controllers and services
-- core business logic and workflows
-- middleware and dependency injection
-- authentication and authorization flow
-- database interactions and data pipelines
-- background workers and asynchronous tasks
+Look for FastAPI routing and execution syntax, including:
+- @app.get, @app.post, @router.post
+- APIRouter()
+- async def, await
+- Depends(get_db), get_current_user
+- HTTPException, status
+- subprocess.run, asyncio.gather
+- Service function calls and middleware setup
 
-Retrieve enough connected code so the complete execution path can be reconstructed from the first incoming request until the final response.
-
-Avoid retrieving isolated utility files that are never used during execution.
+Retrieve the actual Python files where the request is received, processed by business logic, and returned. Avoid plain English documentation or prompt templates.
 """
-
 
 ARCHITECTURE_REVIEW_QUERY = """
 Retrieve repository content that best represents the overall software architecture.
@@ -90,46 +85,30 @@ Avoid retrieving unrelated utility implementations unless they illustrate archit
 
 
 DATABASE_FLOW_QUERY = """
-Retrieve repository files that describe how application data moves through the database during execution.
+Retrieve the actual Python source code that defines how data is written to and read from the database.
 
-Prioritize:
-- ORM models and entity classes
-- schema definitions
-- repositories and data access layers
-- CRUD services and state management
-- core business entity creation workflows
-- data update and deletion operations
-- data retrieval and reporting logic
+Look for SQLAlchemy operations and data manipulation syntax, including:
+- db.add(), db.commit(), db.refresh()
+- select(), .where(), .in_(), result.scalars().all()
+- AsyncSession, Depends(get_db)
+- Code that instantiates new models (e.g., new_repository = models.Repository(...))
 
-Retrieve the complete lifecycle of data:
-creation -> storage -> updates -> retrieval -> final usage.
-
-The goal is to reconstruct the application's business data workflow rather than explaining ORM usage.
+Retrieve the specific functions and services where database records are actively created, queried, and updated during the application's execution.
 """
-
 
 DATABASE_REVIEW_QUERY = """
-Retrieve repository content required to evaluate the database implementation.
+Retrieve the actual database schema, models, and entity definitions.
 
-Prioritize:
-- ORM models and entity definitions
-- database schema and migrations
-- relationships (One-to-Many, Many-to-Many)
-- repositories and data access logic
-- CRUD implementations
-- complex query implementations
-- transaction handling
-- indexes and constraints
+Look for SQLAlchemy model syntax and table definitions, including:
+- __tablename__
+- Column(Integer, primary_key=True)
+- Column(String), Column(JSON)
+- ForeignKey()
+- relationship()
+- Base.metadata
 
-Retrieve enough evidence to review:
-- schema organization and data modeling
-- entity relationships and consistency
-- maintainability and database design quality
-- separation of the persistence layer from business logic
-
-Avoid retrieving unrelated application logic.
+Retrieve the Python files that strictly define the database structure, data types, and relationships between tables. Do not retrieve prompt templates or unrelated logic.
 """
-
 
 SECURITY_REVIEW_QUERY = """
 Retrieve repository content related to implemented security mechanisms.
