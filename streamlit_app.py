@@ -35,11 +35,12 @@ st.write("Generate intelligent reports from your codebase.")
 
 # Set user expectations right on the dashboard!
 st.info(
-    "👋 **Welcome to RepoInsight!** \n\n"
-    "To guarantee the highest quality AI analysis, our engine is currently optimized "
-    "for **small to medium-sized repositories** (up to ~350,000 characters). "
+    "👋 **Welcome to RepoInsight!**\n\n"
+    "To guarantee the highest quality AI analysis, our engine is currently optimized for "
+    "small to medium-sized repositories (up to **~400,000 characters**, or roughly **~10,000 lines of code**). "
     "Support for massive codebases is coming soon!"
 )
+
 
 # Live Render backend URL
 API_URL = "https://repoinsight-backend-1.onrender.com"
@@ -63,14 +64,19 @@ if generate_btn:
     elif not repo_url:
         st.warning("Please enter a repository URL!")
     else:
-        with st.spinner("Cloning repository, embedding chunks, and generating report...\n\n⏳ *This process typically takes up to 1m 15s with a stable internet connection. Please wait...*"):
+        # 1. Start the spinner
+        with st.spinner(
+            "Cloning repository, embedding chunks, and generating report...\n\n"
+            "⏳ *Most reports finish in under 45 seconds, but repositories near the size limit may take up to a maximum of 1m 15s. Please wait...*"
+        ):
+            # 2. Put the try block INSIDE the spinner block
             try:
-                # 4. Prepare Headers with Authentication
+                # 3. Prepare Headers with Authentication
                 headers = {
                     "Authorization": f"Bearer {auth_token}"
                 }
                 
-                # 5. Make Call to Backend
+                # 4. Make Call to Backend
                 response = requests.post(
                     f"{API_URL}/repository_analysis", 
                     json={
@@ -80,6 +86,7 @@ if generate_btn:
                     timeout=180
                 )
                 
+                # 5. Handle the response
                 if response.status_code == 200:
                     st.success("✅ Report Generated Successfully!")
                     
@@ -89,24 +96,19 @@ if generate_btn:
                     for section_key, section_content in report_data.items():
                         display_title = section_key.replace("_", " ").title()
                         
-                        # The Dropdown Expander you liked!
                         with st.expander(f"📁 {display_title}", expanded=True):
-                            
                             if isinstance(section_content, (dict, list)):
-                                # USE THE HELPER FUNCTION HERE INSTEAD OF st.json()
                                 formatted_markdown = json_to_markdown(section_content)
                                 st.markdown(formatted_markdown)
                             else:
                                 st.markdown(section_content)
                                 
                 elif response.status_code == 413:
-                    # Safely extract the exact custom message from the backend JSON
                     try:
                         error_detail = response.json().get("detail", "Repository is too large.")
                     except ValueError:
                         error_detail = "The repository exceeded the maximum allowed size."
                     
-                    # Display a friendly UI instead of a harsh red error
                     st.warning("🧱 **Repository Size Limit Exceeded**", icon="⚠️")
                     st.info(f"**Backend Message:** {error_detail}", icon="ℹ️")
                     st.markdown(
