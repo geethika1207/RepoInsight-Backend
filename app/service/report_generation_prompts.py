@@ -81,6 +81,11 @@ Include enough detail so that the summary explains:
 - and its overall value,
 without discussing implementation details.
 
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 """
 
 
@@ -140,6 +145,12 @@ Output Rules :
 - Do NOT return markdown.
 - Do NOT wrap the response in code fences.
 - The response must begin with "{" and end with "}".
+
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 
 Return ONLY valid JSON matching exactly this schema. Replace the "..." with the extracted technologies, or the exact string "Not mentioned in the retrieved repository context." if none are found.
 
@@ -249,6 +260,11 @@ You MUST use exact, specific nouns from the retrieved code.
 - DO NOT say "The system triggers an event". Say "The /repository_analysis endpoint receives the GitHub URL".
 If you write a generic, abstract sentence, you have failed. Be highly specific.
 
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 ----------------------------------------
 Output
 ----------------------------------------
@@ -354,6 +370,11 @@ You MUST use exact, specific nouns from the retrieved code.
 - DO NOT say "Data is saved to the database". Say "A new FileChunk record is saved to PostgreSQL using SQLAlchemy".
 - DO NOT say "The system triggers an event". Say "The /repository_analysis endpoint receives the GitHub URL".
 If you write a generic, abstract sentence, you have failed. Be highly specific.
+
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
 
 ------------------------------------------------
 Output
@@ -492,6 +513,12 @@ Every suggestion MUST:
 If no significant architectural improvements are supported by the retrieved repository context, return exactly:
 
 "No major architectural improvements identified from the retrieved repository context."
+
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 
 ------------------------------------------------
 Output Rules
@@ -637,6 +664,12 @@ If repository evidence does not support the suggestion, DO NOT generate it.
 If no meaningful database improvements are supported by the retrieved repository context, return exactly:
 
 "No major database improvements identified from the retrieved repository context."
+
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 
 ------------------------------------------------
 Output Rules
@@ -809,6 +842,12 @@ If no meaningful security improvements are supported by repository evidence retu
 
 "No major security improvements identified from the retrieved repository context."
 
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
+
 ------------------------------------------------
 Output
 ------------------------------------------------
@@ -945,6 +984,12 @@ If no meaningful production improvements are supported by the retrieved reposito
 
 "No major production-readiness improvements identified from the retrieved repository context."
 
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
+
 ------------------------------------------------
 Output
 ------------------------------------------------
@@ -1021,6 +1066,12 @@ Rules:
 Return ONLY valid JSON that exactly matches the following schema.
 Do not include markdown, code fences, explanations, or extra text.
 Do not add additional fields.
+
+*** ANTI-META RULE ***
+If the retrieved context contains prompt templates, instructions on how to generate reports, or AI generation logic, YOU MUST IGNORE IT. 
+Do not summarize how a report is written. 
+Only describe the actual execution and database persistence of the application itself.
+
 
 {
     "documentation_review": "...",
