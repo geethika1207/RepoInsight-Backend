@@ -242,6 +242,13 @@ Do NOT review the architecture.
 Do NOT suggest improvements.
 Do NOT discuss security, production readiness or code quality.
 
+*** THE NOUN RULE (MANDATORY) ***
+You MUST use exact, specific nouns from the retrieved code. 
+- DO NOT say "External APIs are utilized". Say "The Groq API is called via the llm_service".
+- DO NOT say "Data is saved to the database". Say "A new FileChunk record is saved to PostgreSQL using SQLAlchemy".
+- DO NOT say "The system triggers an event". Say "The /repository_analysis endpoint receives the GitHub URL".
+If you write a generic, abstract sentence, you have failed. Be highly specific.
+
 ----------------------------------------
 Output
 ----------------------------------------
@@ -340,6 +347,13 @@ Do NOT explain ORM implementation.
 Do NOT review the database.
 Do NOT suggest improvements.
 Do NOT discuss architecture, APIs, or security.
+
+*** THE NOUN RULE (MANDATORY) ***
+You MUST use exact, specific nouns from the retrieved code. 
+- DO NOT say "External APIs are utilized". Say "The Groq API is called via the llm_service".
+- DO NOT say "Data is saved to the database". Say "A new FileChunk record is saved to PostgreSQL using SQLAlchemy".
+- DO NOT say "The system triggers an event". Say "The /repository_analysis endpoint receives the GitHub URL".
+If you write a generic, abstract sentence, you have failed. Be highly specific.
 
 ------------------------------------------------
 Output
