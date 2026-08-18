@@ -211,6 +211,28 @@ Avoid retrieving backend source code unless it contains massive docstrings expla
 """
 
 
+CODE_QUALITY_REVIEW_QUERY = """
+Retrieve representative source code from across the repository required to evaluate overall implementation quality and engineering patterns.
+
+Prioritize retrieving:
+- core business logic and service implementations
+- reusable utilities and shared helper functions
+- API routers, controllers, and endpoint definitions
+- validation logic and error propagation strategies
+- dependency injection and module coupling examples
+- state management and data access patterns
+
+Retrieve enough diverse code samples to evaluate:
+- code duplication and repeated logic across different files
+- separation of concerns and responsibility distribution
+- consistency across similar modules and API endpoints
+- abstraction quality and modularity
+- overall maintainability and project organization
+
+The retrieved code should provide a broad, representative cross-section of the repository's implementation style rather than focusing entirely on a single isolated feature.
+"""
+
+
 CONTRIBUTION_QUERY = """
 Retrieve repository content that reveals realistic contribution opportunities.
 
