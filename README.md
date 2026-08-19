@@ -394,6 +394,7 @@ cd RepoInsight
 
 ### Backend Setup
 
+```bash
 # Create and activate virtual environment
 python -m venv venv
 
