@@ -255,7 +255,6 @@ The **RepoInsight** platform is designed around a set of architectural decisions
 RepoInsight adopts a modular architecture that separates authentication, repository ingestion, chunking, embedding, retrieval, and report generation into independent service layers.
 
 ```text
-## 📂 Repository Architecture (Decoupled Monorepo)
 
 **RepoInsight** adopts a modular, monorepo architecture that cleanly separates the heavy **FastAPI** backend AI pipeline from the lightweight **Streamlit** client.
 
