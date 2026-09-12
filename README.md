@@ -78,35 +78,44 @@ Test the active platform live:
 
 RepoInsight is built on a retrieval-augmented pipeline architecture that separates repository ingestion, hierarchical indexing, and context retrieval into highly optimized, independent stages. By transforming raw source code through Parent-Child chunking and concurrent asynchronous generation, the pipeline seamlessly converts complex repositories into structured, evidence-grounded engineering reviews—resulting in a system that is both deeply accurate and highly extensible.
 
-```text
-GitHub URL
-    │
-    ▼
-Clone Repository (subprocess)
-    │
-    ▼
-Extract Supported Files & Apply Parent-Child Chunking
-    │
-    ▼
-Generate Embeddings (Cohere Embed V3)
-    │
-    ▼
-Store Chunks + Embeddings (PostgreSQL / pgvector)
-    │
-    ▼
-Retrieve Relevant Chunks (Cosine Similarity, per category)
-    │
-    ▼
-O(1) Hash-map Deduplication & Context Merging
-    │
-    ▼
-Prompt Preprocessing (Enforcing Anti-Meta Guardrails)
-    │
-    ▼
-LLM Review Generation (Cohere Command-R via asyncio.gather)
-    │
-    ▼
-Structured JSON Output & Streamlit UI Render
+```mermaid
+flowchart TD
+    subgraph Client ["Client Layer"]
+        UI["🎨 Streamlit Web Application<br/>• Target Repo URL Submission<br/>• Real-Time Progress Bar<br/>• Interactive Multi-Section Audit Dashboard"]
+    end
+
+    subgraph Gateway ["Ingestion & Preprocessing Gateway (FastAPI)"]
+        GitClone["📦 Git Subprocess Isolation<br/>• Shallow clone target repository<br/>• Auto-cleanup in try/finally blocks"]
+        Filter["🔍 Codebase Extractor<br/>• Filters 22+ file extensions (.py, .ts, .go, .rs, .sql)<br/>• 350K character ceiling to guard context"]
+        ChunkEngine["✂️ Parent-Child Chunking Engine<br/>• Parent: Full RepositoryFile database entities<br/>• Child: 500-char sliding windows (200-char overlap)"]
+    end
+
+    subgraph Storage ["PostgreSQL 16 Database + pgvector"]
+        DB_Files[("🗄️ repository_files Table<br/>• Full source code and file paths<br/>• Primary key parent records")]
+        DB_Vectors[("⚡ file_chunks Table<br/>• 1024-d Cohere dense vectors<br/>• Indexed with HNSW (m=16, ef=64)<br/>• Foreign key: repository_file_id")]
+    end
+
+    subgraph Intelligence ["Concurrent AI Analysis Engine (asyncio.gather)"]
+        Queries["🎯 11 Syntax-Targeted Category Queries<br/>(Security, Architecture, DB, Quality, Production, etc.)"]
+        VectorSearch["📐 Parallel pgvector Cosine Search<br/>• Extracts Top-10 child chunks per query<br/>• Deduplicates parent IDs via set()"]
+        ParentAssembler["📋 Single SQL IN(...) Parent Resolution<br/>• Reconstructs full file context without fragmentation"]
+        LLMParallel["🤖 Cohere Command-R (08-2024)<br/>• 7 Parallel LLM workers via asyncio.gather()<br/>• Anti-Meta Guardrails + Tenacity Retries"]
+    end
+
+    %% Pipeline Flows
+    UI -->|1. Submit GitHub URL| GitClone
+    GitClone --> Filter
+    Filter --> ChunkEngine
+    ChunkEngine -->|Persist Full Files| DB_Files
+    ChunkEngine -->|Batch Embed Vectors| DB_Vectors
+
+    UI -->|2. Trigger Analysis| Queries
+    Queries --> VectorSearch
+    VectorSearch -->|Scan Index| DB_Vectors
+    VectorSearch -->|Resolve Parent Keys| DB_Files
+    DB_Files --> ParentAssembler
+    ParentAssembler --> LLMParallel
+    LLMParallel -->|Validated JSON Audit Payload| UI
 ```
 
 
@@ -121,6 +130,34 @@ Structured JSON Output & Streamlit UI Render
 - **Deterministic Grounding:** Enforced strict framework-specific syntax queries and explicit **Anti-Meta Guardrails**. If architectural evidence is missing, the LLM is forced to explicitly state so rather than hallucinating filler content.
 - **Strict Data Integrity:** Bound the LLM to rigid JSON-only schemas that are programmatically validated by the **FastAPI** backend before being safely rendered on the decoupled **Streamlit** client.
 - **Stateful Persistence:** Utilized local, per-repository vector storage via PostgreSQL and **pgvector** for rapid re-indexing and isolated semantic lookups.
+
+```mermaid
+flowchart TD
+    subgraph Naive ["❌ Naive RAG (What Breaks on Code)"]
+        direction TB
+        RawFile1["Raw Source File (e.g. main.py)"] --> FlatSplit["Arbitrary 500-char Window"]
+        FlatSplit --> CutOff["Fragmented Snippet<br/>(Function signature separated from its body!)"]
+        CutOff --> BadLLM["LLM Hallucinates missing variables and logic"]
+    end
+
+    subgraph RepoInsightFlow ["✅ RepoInsight Parent-Child Resolution"]
+        direction TB
+        RawFile2["Raw Source File (e.g. main.py)"] --> SaveParent[("🗄️ Save as RepositoryFile Parent Entity<br/>(Full file preserved intact)")]
+        SaveParent --> MicroChild["✂️ Generate 500-char Search Children<br/>(200-char overlap for sharp vector matching)"]
+        MicroChild --> EmbedChild["Dense Embedding via Cohere Embed V3"]
+        EmbedChild --> VectorDB[("⚡ pgvector HNSW Index")]
+
+        UserQ["🔍 Category Query (e.g. 'Security & Auth')"] --> CosineScan["📐 Cosine Similarity Scan"]
+        VectorDB -.-> CosineScan
+        CosineScan --> Top10["Top-10 Matching Child Chunks"]
+        Top10 --> ExtractFK["Extract repository_file_id foreign keys"]
+        ExtractFK --> DedupSet["O(1) Deduplication via set()"]
+        DedupSet --> BatchSQL["Single SQL Query: SELECT * WHERE id IN (...)"]
+        SaveParent -.-> BatchSQL
+        BatchSQL --> FullParentContext["📋 Full Unbroken Source Files Injected into Context"]
+        FullParentContext --> GoodLLM["🤖 Cohere Command-R: 100% Architecturally Grounded Review"]
+    end
+```
 
 
 ---
@@ -147,21 +184,48 @@ Structured JSON Output & Streamlit UI Render
 
 **RepoInsight** processes every repository through a highly optimized retrieval pipeline that continuously narrows raw source code down to precise, section-specific context. By integrating **Parent-Child Chunking** and concurrent execution via **asyncio.gather()**, the system minimizes noise and latency while keeping the LLM reasoning strictly grounded in verified evidence.
 
-```text
-Parent-Child Context Index (pgvector)
-    │
-    ├── [Concurrent Execution via asyncio.gather()]
-    │
-    ├── Summary & Tech Stack ────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    ├── Architecture Flow ───────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    ├── Code Quality & Design ───► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    ├── Security & Auth ─────────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    ├── Database Operations ─────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    ├── Production Readiness ────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    └── Contribution Zones ──────► Cosine Search ──► O(1) Dedup ──► Cohere LLM ──► Section
-    │
-    ▼
-Structured JSON Assembly & Streamlit UI Render
+```mermaid
+flowchart TD
+    Index[("⚡ pgvector HNSW Index<br/>(Repository Code Chunks and File Mappings)")] --> Scatter["🚀 Concurrent Fan-Out: asyncio.gather()"]
+
+    subgraph ParallelAudit ["Parallel Category Intelligence Streams"]
+        C1["📌 Summary & Tech Stack<br/>• Query: requirements.txt, imports, configs<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C2["🏗️ Architecture & Database Flow<br/>• Query: @router, models, schemas, services<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C3["⚙️ Code Quality & Design Review<br/>• Query: OOP patterns, modularity, DRY principles<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C4["🛡️ Security & Production Readiness<br/>• Query: JWT, auth, Dockerfile, logging<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C5["🗄️ Database Operations Deep-Dive<br/>• Query: Transactions, migrations, connection pool<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C6["📖 Documentation Completeness<br/>• Query: Docstrings, API contracts, README<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+        C7["🚀 High-Impact Contribution Zones<br/>• Query: TODOs, structural gaps, performance bottlenecks<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+    end
+
+    Scatter --> C1
+    Scatter --> C2
+    Scatter --> C3
+    Scatter --> C4
+    Scatter --> C5
+    Scatter --> C6
+    Scatter --> C7
+
+    subgraph LLMExecution ["7 Concurrent Cohere Command-R Workers"]
+        W1["Worker #1: Project Overview JSON"]
+        W2["Worker #2: System Architecture JSON"]
+        W3["Worker #3: Code Quality JSON"]
+        W4["Worker #4: Security & Ops JSON"]
+        W5["Worker #5: Database Audit JSON"]
+        W6["Worker #6: Documentation Audit JSON"]
+        W7["Worker #7: Contribution Roadmap JSON"]
+    end
+
+    C1 --> W1
+    C2 --> W2
+    C3 --> W3
+    C4 --> W4
+    C5 --> W5
+    C6 --> W6
+    C7 --> W7
+
+    W1 & W2 & W3 & W4 & W5 & W6 & W7 --> Gather["⚡ Fan-In: Unified JSON Audit Schema"]
+    Gather --> Streamlit["🎨 Streamlit Reactive Frontend Render"]
 ```
 
 
@@ -185,23 +249,22 @@ Structured JSON Assembly & Streamlit UI Render
 
 **RepoInsight** follows a deterministic, multi-stage generation flow that guarantees every review section is produced exclusively from retrieved evidence rather than model assumption. By enforcing strict **Anti-Meta Guardrails** and utilizing **Cohere Command-R**, this architecture prevents hallucinated technologies, invented architecture claims, and inconsistent reporting across concurrent sections.
 
-```text
-O(1) Deduplicated Context + Syntax-Targeted Prompt
-        │
-        ▼
-Prompt Preprocessor (Enforces Anti-Meta Rules & Escape Hatches)
-        │
-        ▼
-Cohere Command-R Completion (RAG-Optimized Generation)
-        │
-        ▼
-Response Sanitization (Strips Formatting & Code Fences)
-        │
-        ▼
-Strict JSON Parsing & Validation
-        │
-        ▼
-Final Engineering Review Section
+```mermaid
+flowchart TD
+    Step1["📥 Deduplicated Codebase Context + Category System Prompt"] --> Step2["🛡️ Anti-Meta Guardrail Preprocessor<br/>• Forces strict evidence-only answering<br/>• Escape Hatch: Explicitly reports missing components<br/>• Forbids speculative claims and prompt looping"]
+    
+    Step2 --> Step3["🤖 Cohere Command-R (command-r-08-2024)<br/>• Enforces response_format={'type': 'json_object'}<br/>• Tenacity Exponential Backoff Retry (Max 5 attempts)"]
+    
+    Step3 --> Step4{"Regex & JSON Sanitization Engine"}
+    
+    Step4 -->|Clean Output| Step5["✅ Native json.loads()"]
+    Step4 -->|Back-to-Back JSON Objects| Step6["🔧 Regex Repair: re.sub('}{', '},{', text)<br/>• Merges concatenated JSON objects safely"]
+    Step4 -->|Trailing Code Fences| Step7["✂️ Strip Markdown Fences (Code Blocks)"]
+
+    Step6 --> Step5
+    Step7 --> Step5
+    Step5 --> Step8["🎯 Pydantic Strict Data Contract Validation"]
+    Step8 --> Step9["📊 Structured Engineering Review Delivered to UI"]
 ```
 
 
