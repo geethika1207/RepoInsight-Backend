@@ -157,6 +157,8 @@ flowchart TD
         BatchSQL --> FullParentContext["📋 Full Unbroken Source Files Injected into Context"]
         FullParentContext --> GoodLLM["🤖 Cohere Command-R: 100% Architecturally Grounded Review"]
     end
+
+    Naive -.->|Architectural Solution| RepoInsightFlow
 ```
 
 
@@ -186,46 +188,38 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Index[("⚡ pgvector HNSW Index<br/>(Repository Code Chunks and File Mappings)")] --> Scatter["🚀 Concurrent Fan-Out: asyncio.gather()"]
+    Index[("⚡ PostgreSQL 16 + pgvector HNSW Index<br/>(Repository Code Chunks and Hierarchical File Mappings)")]
+    Scatter["🚀 Async Fan-Out: asyncio.gather() Executing 11 Vector Queries in Parallel"]
+    Index --> Scatter
 
-    subgraph ParallelAudit ["Parallel Category Intelligence Streams"]
-        C1["📌 Summary & Tech Stack<br/>• Query: requirements.txt, imports, configs<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C2["🏗️ Architecture & Database Flow<br/>• Query: @router, models, schemas, services<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C3["⚙️ Code Quality & Design Review<br/>• Query: OOP patterns, modularity, DRY principles<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C4["🛡️ Security & Production Readiness<br/>• Query: JWT, auth, Dockerfile, logging<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C5["🗄️ Database Operations Deep-Dive<br/>• Query: Transactions, migrations, connection pool<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C6["📖 Documentation Completeness<br/>• Query: Docstrings, API contracts, README<br/>• Cosine Top-10 ➔ O(1) Dedup"]
-        C7["🚀 High-Impact Contribution Zones<br/>• Query: TODOs, structural gaps, performance bottlenecks<br/>• Cosine Top-10 ➔ O(1) Dedup"]
+    subgraph Tier1 ["Phase 1: High-Level Architecture & Tech Stack"]
+        direction TB
+        C1["📌 Summary & Tech Stack Stream<br/>• Query: requirements.txt, package.json, configs, imports<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Worker #1: Project Overview JSON"]
+        C2["🏗️ Architecture & Database Flow Stream<br/>• Query: @router endpoints, models, schemas, service layers<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Worker #2: System Architecture JSON"]
     end
 
-    Scatter --> C1
-    Scatter --> C2
-    Scatter --> C3
-    Scatter --> C4
-    Scatter --> C5
-    Scatter --> C6
-    Scatter --> C7
-
-    subgraph LLMExecution ["7 Concurrent Cohere Command-R Workers"]
-        W1["Worker #1: Project Overview JSON"]
-        W2["Worker #2: System Architecture JSON"]
-        W3["Worker #3: Code Quality JSON"]
-        W4["Worker #4: Security & Ops JSON"]
-        W5["Worker #5: Database Audit JSON"]
-        W6["Worker #6: Documentation Audit JSON"]
-        W7["Worker #7: Contribution Roadmap JSON"]
+    subgraph Tier2 ["Phase 2: Code Quality, Security & Operations"]
+        direction TB
+        C3["⚙️ Code Quality & Design Patterns Stream<br/>• Query: OOP structure, modularity, DRY principles, error boundaries<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Worker #3: Code Quality Audit JSON"]
+        C4["🛡️ Security Posture & Production Readiness Stream<br/>• Query: JWT auth, input validation, Dockerfile, logging, secrets<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Worker #4: Security & Ops Audit JSON"]
     end
 
-    C1 --> W1
-    C2 --> W2
-    C3 --> W3
-    C4 --> W4
-    C5 --> W5
-    C6 --> W6
-    C7 --> W7
+    subgraph Tier3 ["Phase 3: Deep Database Audit & Contribution Roadmap"]
+        direction TB
+        C5["🗄️ Database Operations Deep-Dive Stream<br/>• Query: ORM models, migrations, indexes, connection pooling<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Worker #5: Database Audit JSON"]
+        C6["📖 Documentation & Contribution Zones Stream<br/>• Query: Docstrings, README, TODO markers, architectural gaps<br/>• Cosine Distance Scan ➔ O(1) Context Deduplication<br/>• Cohere Command-R Workers #6 and #7: Roadmap JSON"]
+    end
 
-    W1 & W2 & W3 & W4 & W5 & W6 & W7 --> Gather["⚡ Fan-In: Unified JSON Audit Schema"]
-    Gather --> Streamlit["🎨 Streamlit Reactive Frontend Render"]
+    Scatter --> Tier1
+    Scatter --> Tier2
+    Scatter --> Tier3
+
+    Gather["⚡ Async Fan-In: Aggregates All 7 Audits into Unified Schema"]
+    Tier1 --> Gather
+    Tier2 --> Gather
+    Tier3 --> Gather
+
+    Gather --> Streamlit["🎨 Streamlit Reactive Frontend: Instant Multi-Tab Audit Dashboard"]
 ```
 
 
